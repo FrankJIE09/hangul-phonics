@@ -46,6 +46,30 @@
 
 直接双击 `index.html`，或访问上面的 GitHub Pages 地址。
 
+## 浏览器与系统兼容性
+
+纯前端单文件，代码是 ES5 语法（无箭头函数 / 模板字符串 / 可选链），CSS 也没用新特性，兼容范围很宽。
+
+| 平台 | 浏览器 | 状态 | 说明 |
+| --- | --- | --- | --- |
+| macOS | Safari | ✅ 支持 | 朗读必须由点击/按键触发（已内置首次手势解锁） |
+| macOS | Chrome / Edge / Firefox | ✅ 支持 | 直接用系统语音 |
+| iOS / iPadOS | Safari 及所有浏览器 | ✅ 支持 | 同 Safari，受手势限制；建议横屏或加书签 |
+| Windows | Chrome / Edge | ✅ 支持 | |
+| Windows | Firefox | ✅ 支持 | 语音列表依赖系统 SAPI |
+
+**macOS 说明**
+
+- macOS 一般已内置韩语语音 **Yuna**，Safari 与 Chrome 都能直接枚举到，通常开箱即用。若自检面板显示「无韩语音色」，到 系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 한국어 下载 Yuna。
+- Safari 对 `file://` 的 `localStorage` 支持不稳定，**在 Mac 上建议用线上地址或本地 http 服务打开**，否则学习记录可能存不下来：
+
+  ```bash
+  cd hangul-phonics && python3 -m http.server 8000
+  ```
+
+- Safari 不允许「页面自己开口说话」，必须先有一次真实点击。页面已在首次点击/按键时做静音解锁，因此**不要期待打开就自动朗读**。
+- 在 Safari 里打断上一句后立刻重播时，代码走同步路径（Chromium 需要延后一个 tick）；另有一个 320ms 看门狗兜底重试，避免「点了没声音」。
+
 ## 本地预览
 
 ```bash

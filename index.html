@@ -732,6 +732,7 @@ footer p { margin: 4px 0; }
           <span class="pill" id="ttsPill">检测中…</span>
         </h4>
         <div class="diag">
+          <div class="diag-item"><span class="k">运行环境：</span><span class="v" id="diagEnv">—</span></div>
           <div class="diag-item"><span class="k">Web Speech API：</span><span class="v" id="diagSupport">—</span></div>
           <div class="diag-item"><span class="k">可用语音数量：</span><span class="v" id="diagCount">—</span></div>
           <div class="diag-item"><span class="k">当前使用：</span><span class="v" id="diagVoice">—</span></div>
@@ -758,7 +759,8 @@ footer p { margin: 4px 0; }
       <ul>
         <li><b>以浏览器 TTS 为准，但必须确认用的是韩语音色。</b>本页全部使用 Web Speech API。若系统没有韩语音色，浏览器会<b>静默改用默认音色</b>（中文/英文）去念韩文，听起来就像「点了这个字却发出别的音」。页面顶部出现红色提示时，请到「⑦ 发音注意事项 → 发音引擎自检」查看可用语音，并按指引安装韩语语音包。</li>
         <li><b>三种发音模式。</b>「自动」优先韩语音色、缺失时退回中文近似音；「强制韩语音色」在有韩语音色时始终用它，<b>若系统里根本没有韩语音色则自动回退近似音并提示</b>（否则会把不同字母读成同一个音）；「中文近似音」用中文音色念每个字母的中文近似字（仅字母可用，整音节不可用）。</li>
-        <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 下载韩语（Yuna）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
+        <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 한국어 → 下载「Yuna」（macOS 通常已内置，Safari 与 Chrome 都能直接用）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
+        <li><b>macOS 使用说明。</b>本页是纯前端单文件，Safari / Chrome / Edge 都能用。<b>Safari 的额外限制</b>：朗读必须由真实点击或按键触发（已自动处理，含首次手势解锁），所以不要期待「打开页面就自动读」；另外 Safari 对 <code>file://</code> 的 localStorage 支持不稳定，建议用下面的线上地址或 <code>python3 -m http.server</code> 打开，避免学习记录存不下来。</li>
         <li><b>单字母是「合成音」。</b>元音用「ㅇ＋元音」、辅音用「辅音＋ㅏ」朗读，目的是听清本音；正式拼读时请以工作台拼出的完整音节为准。</li>
         <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
         <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
@@ -906,6 +908,19 @@ footer p { margin: 4px 0; }
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 
+  /* ---------- 平台 / 浏览器判定 ----------
+     Safari（含 iOS 上的所有浏览器）对 Web Speech API 有两条硬性限制，必须区别对待：
+       1) speak() 必须在「用户手势」的同一任务里调用，setTimeout 之后调用会被静默拒绝；
+       2) 必须由用户真实点击/按键「解锁」过一次，之后才允许朗读。 */
+  var UA = navigator.userAgent || '';
+  var IS_IOS = /iPad|iPhone|iPod/.test(UA) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPadOS 伪装成 Mac
+  var IS_SAFARI = /Safari/.test(UA) &&
+    !/Chrome|Chromium|CriOS|Edg|EdgiOS|OPR|Firefox|FxiOS|Android/.test(UA);
+  var IS_MAC = /Macintosh|Mac OS X/.test(UA) && !IS_IOS;
+  // iOS 上所有浏览器（含 Chrome/Edge/Firefox）底层都是 WebKit，手势限制一致
+  var IS_WEBKIT = IS_SAFARI || IS_IOS;
+
   function shuffle(arr) {
     var a = arr.slice();
     for (var i = a.length - 1; i > 0; i--) {
@@ -1015,8 +1030,11 @@ footer p { margin: 4px 0; }
     lastError: '',
     lastState: '',
     timer: null,
+    watch: null,        // 看门狗定时器，防止「点了没声音」
+    retried: 0,         // 已重试过的 token，避免死循环
     token: 0,
     scanTries: 0,
+    unlocked: false,    // Safari / iOS 是否已完成首次手势解锁
 
     init: function () {
       if (!this.supported) {
@@ -1043,6 +1061,26 @@ footer p { margin: 4px 0; }
         self.refresh(true);
         if (self.koVoice || self.scanTries >= 10) clearInterval(poll);
       }, 500);
+
+      // Safari / iOS：第一次朗读必须由用户手势触发，否则被静默拒绝。
+      // 在第一次点击/按键时先用一条静音语句「解锁」，之后再朗读就稳了。
+      if (IS_WEBKIT) {
+        var unlock = function () {
+          if (self.unlocked) return;
+          self.unlocked = true;
+          try {
+            var u = new SpeechSynthesisUtterance(' ');
+            u.volume = 0;
+            u.rate = 1;
+            u.lang = (self.koVoice && self.koVoice.lang) || 'ko-KR';
+            speechSynthesis.speak(u);
+          } catch (e) {}
+          document.removeEventListener('pointerdown', unlock, true);
+          document.removeEventListener('keydown', unlock, true);
+        };
+        document.addEventListener('pointerdown', unlock, true);
+        document.addEventListener('keydown', unlock, true);
+      }
     },
 
     /* 扫描语音列表并更新全部 UI */
@@ -1156,6 +1194,10 @@ footer p { margin: 4px 0; }
         : (m === 'zh'
             ? (this.zhVoice ? this.zhVoice.name + ' [zh 近似]' : '无')
             : '无可用语音');
+      if ($('#diagEnv')) {
+        $('#diagEnv').textContent = (IS_IOS ? 'iOS / iPadOS' : (IS_MAC ? 'macOS' : '非 macOS')) +
+          ' · ' + (IS_SAFARI ? 'Safari' : (IS_WEBKIT ? 'iOS 上的其他浏览器(WebKit)' : 'Chromium 系 / Gecko'));
+      }
       $('#diagLast').textContent = this.lastText || '—';
       $('#diagError').textContent = this.lastError || '无';
       $('#diagState').textContent = this.supported
@@ -1221,6 +1263,7 @@ footer p { margin: 4px 0; }
 
       var self = this;
       var token = ++this.token;
+      var started = false;   // 本次是否真的开始发声（给看门狗用）
 
       var run = function () {
         if (self.token !== token) return; // 已被新的朗读请求取代
@@ -1233,6 +1276,7 @@ footer p { margin: 4px 0; }
           u.pitch = 1;
           u.volume = 1;
           u.onstart = function () {
+            started = true;
             self.lastState = '朗读中';
             self.lastError = '';
           };
@@ -1258,16 +1302,31 @@ footer p { margin: 4px 0; }
         self.panel();
       };
 
-      // 正在朗读时先 cancel，再等一下重新开始（Chrome 里 cancel 后同一 tick 调 speak 会丢失）
-      // 空闲时同步调用，保留用户手势（Safari / iOS 需要）
+      // 打断上一句再立刻重播：
+      //   Chromium 里 cancel() 后同一 tick 调 speak() 会被吞掉，必须隔一个 tick；
+      //   Safari / iOS 里 setTimeout 会脱离「用户手势」上下文，speak() 被拒（not-allowed），
+      //   所以 Safari 必须同步调用。这里按引擎分流。
       if (speechSynthesis.speaking || speechSynthesis.pending) {
         try { speechSynthesis.cancel(); } catch (e) {}
         if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(run, 70);
+        if (IS_WEBKIT) run();
+        else this.timer = setTimeout(run, 70);
       } else {
         try { speechSynthesis.resume(); } catch (e) {}
         run();
       }
+
+      // 看门狗：极少数情况（Safari 在 cancel 后同步 speak 被静默丢弃）声音根本没开始。
+      // 若 320ms 内既没有 onstart、speaking 也是 false，就重试一次，避免「点了没声音」。
+      if (this.watch) clearTimeout(this.watch);
+      this.watch = setTimeout(function () {
+        if (self.token !== token) return;
+        if (started || self.retried === token) return;
+        if (speechSynthesis.speaking || speechSynthesis.pending) return;
+        self.retried = token;
+        try { speechSynthesis.cancel(); } catch (e) {}
+        run();
+      }, 320);
       this.panel();
       return true;
     }
@@ -2036,7 +2095,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-08.5';
+  var BUILD = '2026-11-08.6';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
