@@ -278,6 +278,17 @@ section { scroll-margin-top: 62px; margin-bottom: 34px; }
 .chip:hover { border-color: var(--accent); background: var(--accent-weak); }
 .chip.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
 .chip.sel:hover { filter: brightness(1.06); }
+/* 「无收音」按钮：虚线边框，与具体收音区分开 */
+.chip.chip-none {
+  min-width: 54px;
+  border-style: dashed;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.chip.chip-none:hover { border-style: dashed; }
+.chip.chip-none.sel { border-style: solid; color: #fff; }
+/* 收音里只用「代表音」发音的双写字母，字号略小以免拥挤 */
+.chip.chip-fin { min-width: 39px; padding: 0 7px; }
 select {
   font: inherit; font-size: 13.5px; color: var(--text);
   background: var(--surface); border: 1px solid var(--border);
@@ -602,8 +613,8 @@ footer p { margin: 4px 0; }
             <div class="chip-grid" id="wbVowels"></div>
           </div>
           <div class="picker">
-            <h3>③ 종성 · 收音（받침，可不选）</h3>
-            <select id="wbFinal" aria-label="选择收音"></select>
+            <h3>③ 종성 · 收音（받침）<span>点击即听，27 个 + 「无」</span></h3>
+            <div class="chip-grid" id="wbFinals"></div>
           </div>
         </div>
         <div class="wb-result" aria-live="polite">
@@ -1228,6 +1239,48 @@ footer p { margin: 4px 0; }
     el.title = detail || text;
   }
 
+  /* 收音按「代表音」给出准确的口型提示（7 种代表音）
+     双收音（ㄳ ㄵ ㄺ …）只读其中一个，这里统一按代表音解释 */
+  var FINAL_NOTES = {
+    'k̚': '舌根抵住软腭停住，不放出气流（不要加「으」）',
+    't̚': '舌尖抵住上齿龈停住，不放出气流',
+    'p̚': '双唇闭合停住，不放出气流',
+    'n':  '舌尖抵上齿龈，气流从鼻腔出',
+    'm':  '双唇闭合，气流从鼻腔出',
+    'l':  '舌尖保持抵住上齿龈，气流从舌两侧出',
+    'ŋ':  '舌根抵软腭，气流从鼻腔出'
+  };
+
+  // 双收音（겹받침）：实际只发其中一个代表音
+  var DOUBLE_FINALS = 'ㄳㄵㄶㄺㄻㄼㄽㄾㄿㅀㅄ';
+
+  function finalNote(fin) {
+    if (!fin.idx) return '받침 可以不加；不加就是开音节，加上后韵尾会改变音节的收尾。';
+    var desc = FINAL_NOTES[fin.ipa] || '作韵尾时收住、不拖长';
+    var extra = DOUBLE_FINALS.indexOf(fin.ch) !== -1
+      ? '（双收音，只发代表音 [' + fin.ipa + ']）'
+      : '';
+    return '받침 ' + fin.ch + ' 读 [' + fin.ipa + ']' + extra + '：' + desc + '。';
+  }
+
+  /* 单独试听一个收音：收音是韵尾，不能独立成音，
+     所以合成「ㅇ + ㅏ + 该收音」来听，如 ㄱ → 악 [ak]、ㅇ → 앙 [aŋ]。 */
+  function speakFinal(finIdx) {
+    var fin = FINALS[finIdx];
+    if (!fin) return false;
+    var demo = compose(11, 0, fin.idx); // 아 / 악 / 앙 …
+
+    if (!fin.idx) {
+      return TTS.speak(demo, { zhText: '啊', rate: 0.85 });
+    }
+    // 无韩语音色时的中文近似兜底
+    var zhApprox = {
+      'k̚': '啊克', 't̚': '啊特', 'p̚': '啊普',
+      'n': '安', 'm': '安姆', 'l': '阿尔', 'ŋ': '昂'
+    }[fin.ipa] || '啊';
+    return TTS.speak(demo, { zhText: zhApprox, rate: 0.85 });
+  }
+
   // 把「单个字母」转成适合朗读的发音；zh 字段用于无韩语音色时的近似朗读
   function speakLetter(ch, opts) {
     opts = opts || {};
@@ -1395,9 +1448,16 @@ footer p { margin: 4px 0; }
         return '<button class="chip" type="button" data-ch="' + v.ch + '" data-idx="' + v.idx + '" title="' + v.en + '">' + v.ch + '</button>';
       }).join('');
 
-      // 收音
-      $('#wbFinal').innerHTML = FINALS.map(function (f) {
-        return '<option value="' + f.idx + '">' + (f.idx === 0 ? '— 无收音' : f.ch) + '</option>';
+      // 收音：与初声 / 中声一致的按钮网格，第一个是「无收音」
+      $('#wbFinals').innerHTML = FINALS.map(function (f) {
+        var isNone = f.idx === 0;
+        return '<button class="chip ' + (isNone ? 'chip-none' : 'chip-fin') + '" type="button"' +
+          ' data-idx="' + f.idx + '"' +
+          ' aria-pressed="false"' +
+          ' title="' + (isNone ? '不加받침（保持开音节）'
+            : '收音 ' + f.ch + ' 读 [' + f.ipa + ']') + '">' +
+          (isNone ? '无' : f.ch) +
+          '</button>';
       }).join('');
 
       this.render();
@@ -1418,17 +1478,18 @@ footer p { margin: 4px 0; }
       if (fin.idx) parts.push(fin.ch + ' (종성)');
       $('#wbBreak').textContent = parts.join('  +  ');
 
-      $('#wbFinalNote').textContent = fin.idx
-        ? '받침 ' + fin.ch + ' 读 [' + fin.ipa + ']，不爆破：只做口型、不放出气流。'
-        : '받침 可以不加；加上后韵尾会改变音节的收尾。';
-
-      $('#wbFinal').value = String(fin.idx);
+      $('#wbFinalNote').textContent = finalNote(fin);
 
       $$('#wbConsonants .chip').forEach(function (c) {
         c.classList.toggle('sel', c.dataset.ch === ini.ch);
       });
       $$('#wbVowels .chip').forEach(function (c) {
         c.classList.toggle('sel', Number(c.dataset.idx) === vow.idx);
+      });
+      $$('#wbFinals .chip').forEach(function (c) {
+        var on = Number(c.dataset.idx) === fin.idx;
+        c.classList.toggle('sel', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
       });
     },
 
@@ -1788,9 +1849,12 @@ footer p { margin: 4px 0; }
       WB.render();
       playLetter(chip.dataset.ch);
     });
-    $('#wbFinal').addEventListener('change', function (e) {
-      WB.finIdx = Number(e.target.value);
+    $('#wbFinals').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      WB.finIdx = Number(chip.dataset.idx);
       WB.render();
+      speakFinal(WB.finIdx);
     });
 
     // 工作台：播放 / 保存
