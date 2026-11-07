@@ -105,6 +105,13 @@ a { color: var(--accent-text); text-decoration: none; }
 }
 .tts-status.ok { color: var(--ok); background: var(--ok-weak); border-color: transparent; }
 .tts-status.warn { color: var(--bad); background: var(--bad-weak); border-color: transparent; }
+/* 顶栏「刚才念的是什么」小标签：用来即时核对 TTS 是否真的收到了不同的字 */
+.tts-said {
+  font-size: 12px; padding: 4px 9px; border-radius: 8px;
+  background: var(--surface-2); border: 1px dashed var(--border);
+  color: var(--fg); white-space: nowrap; max-width: 150px;
+  overflow: hidden; text-overflow: ellipsis;
+}
 .icon-btn {
   width: 38px; height: 38px; flex: none;
   border-radius: 10px; border: 1px solid var(--border);
@@ -522,6 +529,7 @@ footer p { margin: 4px 0; }
     </div>
     <div class="header-actions">
       <span class="tts-status" id="ttsStatus">检测语音中…</span>
+      <span class="tts-said" id="ttsSaid" hidden></span>
       <button class="icon-btn" id="themeBtn" type="button" aria-label="切换夜间模式" title="切换夜间模式">🌙</button>
     </div>
   </div>
@@ -755,6 +763,8 @@ footer p { margin: 4px 0; }
         <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
         <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
         <li><b>紧音 ㄲ ㄸ ㅃ ㅆ ㅉ</b> 是「喉部绷紧、不送气」，不是送气音。TTS 可能读成松音或送气音，听的时候注意短促、有力。</li>
+        <li><b>没有韩语音色时，近似字一定会区分开。</b>松音用一声、平缓（ㄱ→嘎、ㄷ→搭、ㅂ→巴），紧音用四声、短促（ㄲ→尬、ㄸ→大、ㅃ→爸），保证不同字母不会播成同一个音。顶栏「🔊」标签会显示<b>实际送进语音引擎的字</b>，可用来核对。</li>
+        <li><b>看到页脚构建版本号对不上，就是缓存。</b>如果修完仍听到旧行为，按 Ctrl/⌘ + Shift + R 强制刷新（GitHub Pages 有 CDN 缓存）。</li>
         <li><b>받침 ㄱ ㄷ ㅂ</b> 读不爆破的 [k̚ t̚ p̚]：只做口型、不放出气流，不要额外加「으」。</li>
         <li><b>ㅢ · ㅚ · ㅟ</b> 有多个变体读音（如 ㅢ 在助词中常读 /e/），TTS 选择哪一种因语音包而异。</li>
         <li><b>IPA 是宽式近似标注。</b>没有覆盖连音、紧音化、鼻音化、流音化等音变；拼读工作台展示的是「字母层」读音。</li>
@@ -768,6 +778,7 @@ footer p { margin: 4px 0; }
   <div class="container">
     <p>韩语谚文拼读练习 · 纯前端单文件（HTML + CSS + JS），无外部依赖、无 CDN。</p>
     <p>发音由浏览器内置 TTS 提供；学习记录保存在本机浏览器。</p>
+    <p class="build-tag" id="buildTag">构建版本 —</p>
   </div>
 </footer>
 
@@ -789,8 +800,8 @@ footer p { margin: 4px 0; }
     { ch: 'ㅒ', idx: 3,  rom: 'yae', ipa: 'jɛ',   en: 'ye · yes',           kbd: '⇧o',   zh: '耶',  tip: '先“一”再滑向“哎”，口型比ㅖ大' },
     { ch: 'ㅓ', idx: 4,  rom: 'eo',  ipa: 'ʌ',    en: 'uh · sung',          kbd: 'j',    zh: '呃',  tip: '嘴自然张开，舌根稍后缩，双唇不圆（别读成“哦”）' },
     { ch: 'ㅔ', idx: 5,  rom: 'e',   ipa: 'e',    en: 'e · bed',            kbd: 'p',    zh: '诶',  tip: '嘴张比ㅐ小，舌前部抬起；现代首尔音与ㅐ几乎相同' },
-    { ch: 'ㅕ', idx: 6,  rom: 'yeo', ipa: 'jʌ',   en: 'yuh · young',        kbd: 'u',    zh: '耶',  tip: '先“一”再滑向“ㅓ”，注意不要圆唇' },
-    { ch: 'ㅖ', idx: 7,  rom: 'ye',  ipa: 'je',   en: 'ye · yes',           kbd: '⇧p',   zh: '耶',  tip: '先“一”再滑向“ㅔ”，口型比ㅒ小' },
+    { ch: 'ㅕ', idx: 6,  rom: 'yeo', ipa: 'jʌ',   en: 'yuh · young',        kbd: 'u',    zh: '伊呃', tip: '先“一”再滑向“ㅓ”，注意不要圆唇' },
+    { ch: 'ㅖ', idx: 7,  rom: 'ye',  ipa: 'je',   en: 'ye · yes',           kbd: '⇧p',   zh: '夜',  tip: '先“一”再滑向“ㅔ”，口型比ㅒ小' },
     { ch: 'ㅗ', idx: 8,  rom: 'o',   ipa: 'o',    en: 'o · go',             kbd: 'h',    zh: '喔',  tip: '双唇收圆前突，舌根后缩，像说“喔”' },
     { ch: 'ㅘ', idx: 9,  rom: 'wa',  ipa: 'wa',   en: 'wa · water',         kbd: 'h k',  zh: '哇',  tip: '双唇先圆，再快速打开滑向“啊”' },
     { ch: 'ㅙ', idx: 10, rom: 'wae', ipa: 'wɛ',   en: 'we · wet',           kbd: 'h o',  zh: '喂',  tip: '圆唇滑向“哎”，与ㅚ/ㅞ 现代几乎同音' },
@@ -801,8 +812,8 @@ footer p { margin: 4px 0; }
     { ch: 'ㅞ', idx: 15, rom: 'we',  ipa: 'we',   en: 'we',                 kbd: 'n p',  zh: '喂',  tip: '圆唇滑向“ㅔ”，与ㅙ/ㅚ 几乎同音' },
     { ch: 'ㅟ', idx: 16, rom: 'wi',  ipa: 'wi',   en: 'wee',                kbd: 'n l',  zh: '威',  tip: '圆唇滑向“一”，也可读成圆唇的“이”' },
     { ch: 'ㅠ', idx: 17, rom: 'yu',  ipa: 'ju',   en: 'you',                kbd: 'b',    zh: '优',  tip: '先“一”再滑向“ㅜ”，双唇收圆' },
-    { ch: 'ㅡ', idx: 18, rom: 'eu',  ipa: 'ɯ',    en: 'i-ish · lips spread', kbd: 'm',   zh: '呃',  tip: '嘴角向两边平展（像微笑），舌根后缩，介于“一”和“乌”' },
-    { ch: 'ㅢ', idx: 19, rom: 'ui',  ipa: 'ɰi',   en: 'u-i glide',          kbd: 'm l',  zh: '诶',  tip: '先发“ㅡ”再快速滑向“ㅣ”；词首读 /ɰi/，助词中常读 /e/' },
+    { ch: 'ㅡ', idx: 18, rom: 'eu',  ipa: 'ɯ',    en: 'i-ish · lips spread', kbd: 'm',   zh: '嗯',  tip: '嘴角向两边平展（像微笑），舌根后缩，介于“一”和“乌”' },
+    { ch: 'ㅢ', idx: 19, rom: 'ui',  ipa: 'ɰi',   en: 'u-i glide',          kbd: 'm l',  zh: '嗯伊', tip: '先发“ㅡ”再快速滑向“ㅣ”；词首读 /ɰi/，助词中常读 /e/' },
     { ch: 'ㅣ', idx: 20, rom: 'i',   ipa: 'i',    en: 'ee · see',           kbd: 'l',    zh: '衣',  tip: '嘴角向两边拉开，舌尖抵下齿，像说“衣”' }
   ];
 
@@ -821,11 +832,11 @@ footer p { margin: 4px 0; }
     { ch: 'ㅊ', idx: 14, name: '치읓',      rom: 'ch',   ipa: 'tɕʰ',     ipaC: 'tɕʰ',  en: 'ch · cheese',      kbd: 'c',  zh: '叉', tip: '同ㅈ但强送气，纸片放在嘴前会被吹动' },
     { ch: 'ㅎ', idx: 18, name: '히읗',      rom: 'h',    ipa: 'h',       ipaC: 'h',    en: 'h · hat',          kbd: 'g',  zh: '哈', tip: '喉咙放松送气；在ㄱ/ㄷ/ㅂ/ㅈ 前常弱化甚至不发音' },
 
-    { ch: 'ㄲ', idx: 1,  name: '쌍기역',    rom: 'kk',   ipa: 'k͈',      ipaC: 'k͈',   en: 'k · tense (kk)',   kbd: '⇧r', zh: '嘎', tip: '同ㄱ但喉部绷紧，不送气，短促有力' },
-    { ch: 'ㄸ', idx: 4,  name: '쌍디귿',    rom: 'tt',   ipa: 't͈',      ipaC: 't͈',   en: 't · tense (tt)',   kbd: '⇧e', zh: '打', tip: '舌尖用力抵住再弹开，喉部绷紧，不送气' },
-    { ch: 'ㅃ', idx: 8,  name: '쌍비읍',    rom: 'pp',   ipa: 'p͈',      ipaC: 'p͈',   en: 'p · tense (pp)',   kbd: '⇧q', zh: '巴', tip: '双唇紧闭用力弹开，不送气' },
-    { ch: 'ㅆ', idx: 10, name: '쌍시옷',    rom: 'ss',   ipa: 's͈',      ipaC: 's͈',   en: 'ss · tense',       kbd: '⇧t', zh: '撒', tip: '用力摩擦，比ㅅ更紧、更持久' },
-    { ch: 'ㅉ', idx: 13, name: '쌍지읒',    rom: 'jj',   ipa: 'tɕ͈',     ipaC: 'tɕ͈',  en: 'j · tense (jj)',   kbd: '⇧w', zh: '咋', tip: '舌面绷紧，不送气，短促' },
+    { ch: 'ㄲ', idx: 1,  name: '쌍기역',    rom: 'kk',   ipa: 'k͈',      ipaC: 'k͈',   en: 'k · tense (kk)',   kbd: '⇧r', zh: '尬', tip: '同ㄱ但喉部绷紧，不送气，短促有力' },
+    { ch: 'ㄸ', idx: 4,  name: '쌍디귿',    rom: 'tt',   ipa: 't͈',      ipaC: 't͈',   en: 't · tense (tt)',   kbd: '⇧e', zh: '大', tip: '舌尖用力抵住再弹开，喉部绷紧，不送气' },
+    { ch: 'ㅃ', idx: 8,  name: '쌍비읍',    rom: 'pp',   ipa: 'p͈',      ipaC: 'p͈',   en: 'p · tense (pp)',   kbd: '⇧q', zh: '爸', tip: '双唇紧闭用力弹开，不送气' },
+    { ch: 'ㅆ', idx: 10, name: '쌍시옷',    rom: 'ss',   ipa: 's͈',      ipaC: 's͈',   en: 'ss · tense',       kbd: '⇧t', zh: '飒', tip: '用力摩擦，比ㅅ更紧、更持久' },
+    { ch: 'ㅉ', idx: 13, name: '쌍지읒',    rom: 'jj',   ipa: 'tɕ͈',     ipaC: 'tɕ͈',  en: 'j · tense (jj)',   kbd: '⇧w', zh: '炸', tip: '舌面绷紧，不送气，短促' },
 
     { ch: 'ㄴ', idx: 2,  name: '니은',      rom: 'n',    ipa: 'n',       ipaC: 'n',    en: 'n · no',           kbd: 's',  zh: '拿', tip: '舌尖抵上齿龈，气流从鼻腔出' },
     { ch: 'ㅁ', idx: 6,  name: '미음',      rom: 'm',    ipa: 'm',       ipaC: 'm',    en: 'm · man',          kbd: 'a',  zh: '妈', tip: '双唇闭合，气流从鼻腔出' },
@@ -1071,32 +1082,46 @@ footer p { margin: 4px 0; }
       return list.sort(function (a, b) { return score(b) - score(a); })[0];
     },
 
-    /* 当前真正生效的模式 */
+    /* 当前真正生效的模式
+       ★ 关键约束：绝不能在没有韩语音色时把「韩文」交给非韩语音色。
+         中文 / 英文音色读到「가 다 바」这类谚文时，往往退化成同一个音，
+         听感就是「点哪个字母都一样」——这是最难察觉的静默错误。
+         所以这里宁可回退到 zh 近似音，也不返回 'ko'。 */
     activeMode: function () {
-      if (this.mode === 'zh') return this.zhVoice ? 'zh' : 'ko';
-      if (this.mode === 'ko') return 'ko';
-      if (this.koVoice) return 'ko';
-      return this.zhVoice ? 'zh' : 'ko'; // 都没有就硬着头皮用 ko-KR
+      if (this.mode !== 'zh' && this.koVoice) return 'ko';
+      if (this.zhVoice) return 'zh';
+      return 'none';
     },
 
     updateStatus: function (silent) {
       if (!this.supported) return;
       var m = this.activeMode();
-      if (m === 'ko' && this.koVoice) {
+      if (m === 'ko') {
         setTtsStatus('韩语音色 · ' + this.koVoice.name, 'ok');
         this.banner('', false);
       } else if (m === 'zh') {
-        setTtsStatus('中文近似音（无韩语音色）', 'warn');
-        this.banner(
-          '未检测到韩语音色，已启用<b>中文近似音</b>兜底：单个字母的发音接近正确，' +
-          '但整音节（如 넉、즤）无法准确朗读，练习模式会自动只出「看字选组合」题。',
-          false
-        );
+        if (this.mode === 'ko') {
+          // 用户强制要求韩语音色，但系统里没有 → 必须回退，否则会读成同一个音
+          setTtsStatus('无韩语音色 · 已回退近似音', 'warn');
+          this.banner(
+            '你选了「强制韩语音色」，但系统里<b>没有</b>任何韩语音色。' +
+            '若强行把韩文交给中文音色朗读，不同字母会退化成同一个音，' +
+            '所以这里已自动回退到<b>中文近似音</b>，每个字母用独立的近似字朗读。',
+            true
+          );
+        } else {
+          setTtsStatus('中文近似音（无韩语音色）', 'warn');
+          this.banner(
+            '未检测到韩语音色，已启用<b>中文近似音</b>：每个字母用<b>不同的近似字</b>朗读' +
+            '（ㄱ→嘎、ㄷ→搭、ㅂ→巴），保证彼此可区分；但整音节（如 넉、즤）无法准确朗读，' +
+            '练习模式会自动只出「看字选组合」题。',
+            false
+          );
+        }
       } else {
-        setTtsStatus('未检测到韩语音色', 'warn');
+        setTtsStatus('无可用语音', 'warn');
         this.banner(
-          '未检测到韩语音色：浏览器会用系统默认音色去念韩文，听起来像「别的音」。' +
-          '请安装韩语语音包，或切到「中文近似音」模式。',
+          '浏览器里没有任何可用语音，无法朗读。请安装韩语（或中文）语音包后点「重新检测」。',
           true
         );
       }
@@ -1126,9 +1151,11 @@ footer p { margin: 4px 0; }
       $s.textContent = this.supported ? '可用' : '不可用';
       $('#diagCount').textContent = this.voices.length + ' 个' +
         (this.voices.length ? '（' + Array.from(new Set(this.voices.map(function (v) { return v.lang; }))).join(', ') + '）' : '');
-      $('#diagVoice').textContent = m === 'zh'
-        ? (this.zhVoice ? this.zhVoice.name + ' [zh 近似]' : '无')
-        : (this.koVoice ? this.koVoice.name + ' [ko]' : '无韩语音色 → 使用默认音色');
+      $('#diagVoice').textContent = m === 'ko'
+        ? this.koVoice.name + ' [ko]'
+        : (m === 'zh'
+            ? (this.zhVoice ? this.zhVoice.name + ' [zh 近似]' : '无')
+            : '无可用语音');
       $('#diagLast').textContent = this.lastText || '—';
       $('#diagError').textContent = this.lastError || '无';
       $('#diagState').textContent = this.supported
@@ -1137,9 +1164,9 @@ footer p { margin: 4px 0; }
 
       var pill = $('#ttsPill');
       if (!this.supported) { pill.className = 'pill bad'; pill.textContent = '不可用'; }
+      else if (m === 'ko') { pill.className = 'pill good'; pill.textContent = '韩语音色就绪'; }
       else if (m === 'zh') { pill.className = 'pill bad'; pill.textContent = '无韩语音色 · 近似音'; }
-      else if (this.koVoice) { pill.className = 'pill good'; pill.textContent = '韩语音色就绪'; }
-      else { pill.className = 'pill bad'; pill.textContent = '无韩语音色 · 可能读错'; }
+      else { pill.className = 'pill bad'; pill.textContent = '无可用语音'; }
 
       // 语音下拉
       var sel = $('#voiceSelect');
@@ -1171,6 +1198,13 @@ footer p { margin: 4px 0; }
       opts = opts || {};
       if (!this.supported) return false;
       var mode = this.activeMode();
+      if (mode === 'none') {
+        this.lastError = '没有可用音色';
+        if (typeof this.banner === 'function') {
+          this.banner('浏览器里没有任何可用语音，无法朗读。请先安装语音包后点「重新检测」。', true);
+        }
+        return false;
+      }
       var text = (mode === 'zh' && opts.zhText) ? opts.zhText : koText;
       if (!text) return false;
 
@@ -1182,10 +1216,11 @@ footer p { margin: 4px 0; }
         voice = this.koVoice;
         lang = (voice && voice.lang) || 'ko-KR';
       }
+      // 中文近似音放慢一点，单个汉字的声母（g/d/b…）才听得清，也避免被吞成同一个音
+      var rate = opts.rate || (mode === 'zh' ? 0.68 : 0.85);
 
       var self = this;
       var token = ++this.token;
-      var rate = opts.rate || 0.85;
 
       var run = function () {
         if (self.token !== token) return; // 已被新的朗读请求取代
@@ -1209,6 +1244,13 @@ footer p { margin: 4px 0; }
           };
           u.onend = function () { self.lastState = '结束'; };
           self.lastText = text;
+          var said = $('#ttsSaid');
+          if (said) {
+            said.textContent = '🔊 ' + text;
+            said.hidden = false;
+            said.title = '实际送给语音引擎的内容：' + text +
+              '（' + (voice ? voice.name : lang) + '）';
+          }
           speechSynthesis.speak(u);
         } catch (err) {
           self.lastError = String(err && err.message || err);
@@ -1271,14 +1313,14 @@ footer p { margin: 4px 0; }
     var demo = compose(11, 0, fin.idx); // 아 / 악 / 앙 …
 
     if (!fin.idx) {
-      return TTS.speak(demo, { zhText: '啊', rate: 0.85 });
+      return TTS.speak(demo, { zhText: '啊' });
     }
     // 无韩语音色时的中文近似兜底
     var zhApprox = {
       'k̚': '啊克', 't̚': '啊特', 'p̚': '啊普',
       'n': '安', 'm': '安姆', 'l': '阿尔', 'ŋ': '昂'
     }[fin.ipa] || '啊';
-    return TTS.speak(demo, { zhText: zhApprox, rate: 0.85 });
+    return TTS.speak(demo, { zhText: zhApprox });
   }
 
   // 把「单个字母」转成适合朗读的发音；zh 字段用于无韩语音色时的近似朗读
@@ -1762,7 +1804,7 @@ footer p { margin: 4px 0; }
         var act = e.target.dataset && e.target.dataset.act;
         if (act === 'rescan') {
           TTS.refresh();
-          TTS.speak('가', { rate: 0.85 });
+          TTS.speak('가', { zhText: '嘎' });
         } else if (act === 'settings') {
           var panel = $('#ttsSettings');
           if (panel) panel.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -1793,7 +1835,7 @@ footer p { margin: 4px 0; }
         Store.save();
         TTS.refresh();
         // 立即用新模式试一下，方便判断是否生效
-        TTS.speak(compose(0, 0, 0), { zhText: '嘎', rate: 0.85 });
+        TTS.speak(compose(0, 0, 0), { zhText: '嘎' });
       });
     }
 
@@ -1803,7 +1845,7 @@ footer p { margin: 4px 0; }
       rescan.addEventListener('click', function () {
         TTS.scanTries = 0;
         TTS.refresh();
-        TTS.speak(compose(0, 0, 0), { zhText: '嘎', rate: 0.85 });
+        TTS.speak(compose(0, 0, 0), { zhText: '嘎' });
       });
     }
 
@@ -1991,6 +2033,19 @@ footer p { margin: 4px 0; }
   } else {
     init();
   }
+
+  /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
+     如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
+  var BUILD = '2026-11-08.5';
+  (function stampBuild() {
+    var el = $('#buildTag');
+    if (el) {
+      el.textContent = '构建版本 ' + BUILD +
+        ' · ' + (location.protocol === 'file:' ? '本地文件' : location.host);
+    }
+    window.__HANGUL_BUILD__ = BUILD;
+    try { console.info('[hangul-phonics] build', BUILD); } catch (e) {}
+  })();
 })();
 </script>
 </body>
