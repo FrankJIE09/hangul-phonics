@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>韩语谚文拼读练习 · Hangul Phonics</title>
+<script>
+  /* 提前读取主题，避免夜间模式闪烁 */
+  try {
+    var saved = JSON.parse(localStorage.getItem('hangul-phonics-v1') || '{}');
+    if (saved.theme === 'dark') document.documentElement.dataset.theme = 'dark';
+    else if (!saved.theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.dataset.theme = 'dark';
+    }
+  } catch (e) {}
+</script>
+<style>
+/* ==========================================================================
+   1. 主题变量（浅色 / 深色）
+   ========================================================================== */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --text: #111827;
+  --muted: #5b6675;
+  --border: #dbe2ea;
+  --accent: #2563eb;
+  --accent-weak: #e8f0ff;
+  --accent-text: #1d4ed8;
+  --ok: #0f8a4d;
+  --ok-weak: #e6f6ed;
+  --bad: #c02626;
+  --bad-weak: #fdeaea;
+  --radius: 14px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --shadow: 0 1px 2px rgba(17, 24, 39, .05), 0 8px 24px rgba(17, 24, 39, .05);
+}
+html[data-theme="dark"] {
+  --bg: #0c1016;
+  --surface: #141a23;
+  --surface-2: #1b2330;
+  --text: #e8eef6;
+  --muted: #9aa8ba;
+  --border: #2a3442;
+  --accent: #5b8cff;
+  --accent-weak: #1a2740;
+  --accent-text: #a9c2ff;
+  --ok: #4ade80;
+  --ok-weak: #12301f;
+  --bad: #ff8686;
+  --bad-weak: #341a1a;
+  --shadow: none;
+}
+
+/* ==========================================================================
+   2. 基础排版
+   ========================================================================== */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Microsoft YaHei", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+button { font: inherit; color: inherit; }
+a { color: var(--accent-text); text-decoration: none; }
+.container { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+.sub { color: var(--muted); }
+.sec-kr { font-size: 12px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+
+/* ==========================================================================
+   3. 顶栏 / 导航
+   ========================================================================== */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 20px;
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark {
+  width: 44px; height: 44px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 13px; background: var(--accent); color: #fff;
+  font-size: 23px; font-weight: 700;
+}
+.brand h1 { font-size: 20px; letter-spacing: .01em; }
+.brand .sub { font-size: 12px; margin: 2px 0 0; }
+.header-actions { display: flex; align-items: center; gap: 10px; flex: none; }
+.tts-status {
+  font-size: 11.5px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--muted); white-space: nowrap; max-width: 260px;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.tts-status.ok { color: var(--ok); background: var(--ok-weak); border-color: transparent; }
+.tts-status.warn { color: var(--bad); background: var(--bad-weak); border-color: transparent; }
+.icon-btn {
+  width: 38px; height: 38px; flex: none;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; font-size: 17px;
+  display: grid; place-items: center;
+}
+.icon-btn:hover { background: var(--surface-2); }
+
+.toc {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.toc-inner {
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 20px;
+  scrollbar-width: none;
+}
+.toc-inner::-webkit-scrollbar { display: none; }
+.toc a {
+  flex: none; padding: 6px 11px; border-radius: 8px;
+  font-size: 12.5px; color: var(--muted); white-space: nowrap;
+}
+.toc a:hover { background: var(--accent-weak); color: var(--accent-text); }
+
+/* ==========================================================================
+   4. 通用区块 / 卡片
+   ========================================================================== */
+main { padding: 26px 0 40px; }
+section { scroll-margin-top: 62px; margin-bottom: 34px; }
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 12px;
+}
+.section-head h2 { font-size: 19px; }
+.section-head .hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 16px; border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--accent); color: #fff;
+  font-weight: 600; font-size: 13.5px; cursor: pointer;
+  transition: filter .12s ease, background .12s ease;
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
+.btn.ghost:hover { background: var(--surface-2); filter: none; }
+.btn:disabled { opacity: .42; cursor: not-allowed; filter: none; }
+.btn:focus-visible, .icon-btn:focus-visible, .tile:focus-visible,
+.chip:focus-visible, .opt:focus-visible, .fchip:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+
+/* ==========================================================================
+   5. 学习进度
+   ========================================================================== */
+.progress-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.progress-top h2 { font-size: 16px; }
+.progress-num { font-size: 13px; color: var(--muted); }
+.progress-num b { color: var(--accent-text); font-size: 16px; }
+.bar {
+  height: 8px; border-radius: 999px; background: var(--surface-2);
+  overflow: hidden; margin: 10px 0 4px;
+}
+.bar-fill {
+  height: 100%; width: 0; border-radius: 999px;
+  background: var(--accent); transition: width .3s ease;
+}
+.progress-foot {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 11.5px; color: var(--muted); flex-wrap: wrap;
+}
+.focus {
+  display: flex; align-items: flex-start; gap: 10px;
+  flex-wrap: wrap; margin-top: 14px; padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+.focus-label {
+  font-size: 12px; color: var(--muted); padding-top: 10px;
+  white-space: nowrap;
+}
+.focus-label b { color: var(--text); }
+.focus-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.fchip {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 52px; padding: 6px 9px;
+  border-radius: 11px; border: 1px solid var(--border);
+  background: var(--surface-2); cursor: pointer;
+  transition: border-color .12s ease, background .12s ease;
+}
+.fchip:hover { border-color: var(--accent); }
+.fchip .fc-char { font-size: 21px; font-weight: 700; line-height: 1.2; }
+.fchip .fc-ipa { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+.fchip.done { border-color: var(--ok); background: var(--ok-weak); }
+.fchip.done .fc-char::after { content: "✓"; font-size: 10px; margin-left: 3px; color: var(--ok); }
+
+/* ==========================================================================
+   6. 字母方块
+   ========================================================================== */
+.group + .group { margin-top: 18px; }
+.group-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .05em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 9px;
+}
+.grid {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(154px, 1fr));
+}
+.tile {
+  position: relative;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 1px; padding: 13px 14px 12px;
+  background: var(--surface); text-align: left;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color .12s ease, background .12s ease;
+}
+.tile:hover { border-color: var(--accent); background: var(--accent-weak); }
+.tile.playing { border-color: var(--accent); background: var(--accent-weak); }
+.tile-key {
+  position: absolute; top: 9px; right: 11px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+}
+.tile-char { font-size: 33px; font-weight: 700; line-height: 1.1; }
+.tile-ipa {
+  font-family: var(--mono); font-size: 12.5px;
+  color: var(--accent-text); margin-top: 2px;
+}
+.tile-en { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.tile-tip {
+  font-size: 11px; line-height: 1.42; color: var(--muted); margin-top: 5px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tile.learned::after {
+  content: "✓"; position: absolute; right: 11px; bottom: 9px;
+  font-size: 10px; color: var(--ok);
+}
+.note-inline {
+  font-size: 11.5px; color: var(--muted); margin: 10px 0 0;
+  padding: 8px 11px; background: var(--surface-2);
+  border-radius: 9px; line-height: 1.5;
+}
+
+/* ==========================================================================
+   7. 拼读工作台
+   ========================================================================== */
+.wb { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 20px; }
+.wb-left { min-width: 0; }
+.picker + .picker { margin-top: 16px; }
+.picker h3 { font-size: 13px; margin-bottom: 8px; }
+.picker h3 span { color: var(--muted); font-weight: 400; font-size: 11.5px; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  min-width: 41px; height: 38px; padding: 0 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); cursor: pointer;
+  font-size: 17px; font-weight: 600;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+.chip:hover { border-color: var(--accent); background: var(--accent-weak); }
+.chip.sel { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip.sel:hover { filter: brightness(1.06); }
+select {
+  font: inherit; font-size: 13.5px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 12px; width: 100%; max-width: 260px;
+  cursor: pointer;
+}
+.wb-result {
+  position: sticky; top: 58px; align-self: start;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 22px 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 16px;
+  text-align: center;
+}
+.wb-char { font-size: 92px; font-weight: 700; line-height: 1.05; letter-spacing: .02em; }
+.wb-meta { font-size: 13px; color: var(--muted); font-family: var(--mono); }
+.wb-meta b { color: var(--accent-text); }
+.wb-break { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.wb-final-note {
+  font-size: 11.5px; color: var(--muted); line-height: 1.5;
+  margin-top: 6px; max-width: 260px;
+}
+.wb-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+
+/* ==========================================================================
+   8. 练习模式
+   ========================================================================== */
+.pr-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.pr-type { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.pr-stats { font-size: 12.5px; color: var(--muted); }
+.pr-stats b { color: var(--text); font-variant-numeric: tabular-nums; }
+.pr-card {
+  border: 1px solid var(--border); border-radius: 16px;
+  background: var(--surface-2); padding: 22px 18px; text-align: center;
+}
+.pr-prompt { font-size: 62px; font-weight: 700; line-height: 1.15; }
+.pr-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.pr-options {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px; margin-top: 18px;
+}
+.opt {
+  padding: 14px 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  cursor: pointer; font-size: 16px; font-weight: 600;
+  transition: border-color .12s ease, background .12s ease;
+  word-break: keep-all;
+}
+.opt:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-weak); }
+.opt.syl { font-size: 30px; padding: 10px 12px; }
+.opt.correct { border-color: var(--ok); background: var(--ok-weak); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-weak); }
+.opt:disabled { cursor: default; }
+.pr-feedback { min-height: 22px; margin-top: 13px; font-size: 13px; font-weight: 600; }
+.pr-feedback.ok { color: var(--ok); }
+.pr-feedback.bad { color: var(--bad); }
+.pr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+/* ==========================================================================
+   9. 复习面板
+   ========================================================================== */
+.rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.rev-col h3 { font-size: 13px; margin-bottom: 9px; }
+.rev-col h3 .count {
+  font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 4px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 38px; }
+.rev-item {
+  display: inline-flex; align-items: stretch;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface-2); overflow: hidden;
+}
+.rev-play {
+  border: 0; background: none; cursor: pointer;
+  padding: 6px 10px; font-size: 17px; font-weight: 600; line-height: 1.4;
+}
+.rev-play:hover { background: var(--accent-weak); }
+.rev-del {
+  border: 0; border-left: 1px solid var(--border); background: none;
+  cursor: pointer; padding: 0 8px; color: var(--muted); font-size: 13px;
+}
+.rev-del:hover { color: var(--bad); background: var(--bad-weak); }
+.empty { font-size: 12px; color: var(--muted); padding: 9px 0; }
+.rev-actions { margin-top: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rev-tip { font-size: 11.5px; color: var(--muted); }
+
+/* ==========================================================================
+   10. 对照表格
+   ========================================================================== */
+.table-wrap {
+  overflow-x: auto; border: 1px solid var(--border);
+  border-radius: 14px; background: var(--surface);
+}
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 620px; }
+th, td { padding: 10px 13px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th {
+  font-size: 11.5px; color: var(--muted); font-weight: 700;
+  background: var(--surface-2); letter-spacing: .03em; white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: none; }
+td.t-letter { font-size: 23px; font-weight: 700; white-space: nowrap; width: 96px; }
+.t-kbd { font-family: var(--mono); font-size: 10px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+td.t-ipa { font-family: var(--mono); color: var(--accent-text); white-space: nowrap; width: 130px; }
+td.t-en { color: var(--text); width: 180px; }
+td.t-tip { color: var(--muted); font-size: 12.5px; }
+tr.group-row td {
+  background: var(--surface-2); color: var(--muted);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 7px 13px;
+}
+
+/* ==========================================================================
+   10.5 发音诊断 / 备用模式提示
+   ========================================================================== */
+.tts-banner {
+  display: none;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--bad);
+  background: var(--bad-weak);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tts-banner.show { display: block; }
+.tts-banner.ok {
+  border-color: var(--ok);
+  background: var(--ok-weak);
+}
+.tts-banner b { color: var(--bad); }
+.tts-banner.ok b { color: var(--ok); }
+.tts-banner .bn-actions {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+}
+.tts-banner .bn-actions .btn { padding: 6px 12px; font-size: 12.5px; }
+
+.tts-panel {
+  border: 1px solid var(--border); border-radius: 14px;
+  background: var(--surface-2); padding: 14px 16px; margin-bottom: 18px;
+}
+.tts-panel h4 {
+  margin: 0 0 10px; font-size: 13px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.tts-panel h4 .pill {
+  font-size: 10.5px; font-weight: 600; padding: 2px 8px;
+  border-radius: 999px; background: var(--accent-weak); color: var(--accent-text);
+}
+.tts-panel h4 .pill.bad { background: var(--bad-weak); color: var(--bad); }
+.tts-panel h4 .pill.good { background: var(--ok-weak); color: var(--ok); }
+.diag {
+  display: grid; gap: 6px 18px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-bottom: 12px;
+}
+.diag-item { font-size: 12px; color: var(--muted); min-width: 0; }
+.diag-item .k { color: var(--muted); }
+.diag-item .v {
+  color: var(--text); font-family: var(--mono); font-size: 11.5px;
+  word-break: break-all;
+}
+.tts-controls {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.tts-controls label { font-size: 12px; color: var(--muted); }
+.tts-controls select { max-width: 320px; padding: 7px 10px; font-size: 12.5px; }
+.tts-controls .btn { padding: 7px 12px; font-size: 12.5px; }
+.tts-mode-group {
+  display: flex; gap: 4px; padding: 3px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+}
+.tts-mode-group button {
+  border: 0; background: none; cursor: pointer;
+  font-size: 12px; padding: 6px 10px; border-radius: 7px; color: var(--muted);
+}
+.tts-mode-group button[aria-pressed="true"] {
+  background: var(--accent); color: #fff; font-weight: 600;
+}
+
+/* ==========================================================================
+   11. 发音注意事项 / 页脚
+   ========================================================================== */
+.notes ul { margin: 0; padding-left: 20px; }
+.notes li { font-size: 13px; color: var(--muted); margin: 7px 0; line-height: 1.6; }
+.notes li b { color: var(--text); }
+footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 0 30px; font-size: 11.5px; color: var(--muted);
+}
+footer p { margin: 4px 0; }
+
+/* ==========================================================================
+   12. 响应式
+   ========================================================================== */
+@media (max-width: 860px) {
+  .wb { grid-template-columns: 1fr; }
+  .wb-result { position: static; }
+  .rev-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .container { padding: 0 15px; }
+  .header-inner { padding: 12px 15px; }
+  .brand h1 { font-size: 17px; }
+  .brand .sub { display: none; }
+  .tts-status { max-width: 120px; font-size: 10.5px; }
+  .toc-inner { padding: 8px 15px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .tile-char { font-size: 29px; }
+  .pr-options { grid-template-columns: 1fr; }
+  .pr-prompt { font-size: 52px; }
+  .wb-char { font-size: 76px; }
+  .panel { padding: 16px; }
+  section { margin-bottom: 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= 顶栏 ======================= -->
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">한</div>
+      <div>
+        <h1>韩语谚文拼读练习</h1>
+        <p class="sub">Hangul Phonics · 字母发音 · 拼字工作台 · 随机练习</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="tts-status" id="ttsStatus">检测语音中…</span>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="切换夜间模式" title="切换夜间模式">🌙</button>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= 目录导航 ======================= -->
+<nav class="toc" aria-label="页面导航">
+  <div class="container toc-inner">
+    <a href="#progress">学习进度</a>
+    <a href="#vowels">元音区</a>
+    <a href="#consonants">辅音区</a>
+    <a href="#workbench">拼读工作台</a>
+    <a href="#practice">练习模式</a>
+    <a href="#review">复习面板</a>
+    <a href="#table">对照表</a>
+    <a href="#notes">发音注意</a>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- 发音环境提示：无韩语音色时自动出现 -->
+  <div class="tts-banner" id="ttsBanner" role="status"></div>
+
+  <!-- ======================= 1. 学习进度 ======================= -->
+  <section id="progress">
+    <div class="panel">
+      <div class="progress-top">
+        <h2>学习进度 <span class="sec-kr">학습 진도</span></h2>
+        <div class="progress-num"><b id="progressCount">0 / 40</b> 个字母已听读 · <b id="progressPct">0%</b></div>
+      </div>
+      <div class="bar" aria-hidden="true"><div class="bar-fill" id="progressFill"></div></div>
+      <div class="progress-foot">
+        <span>点击字母听到发音，即计入进度。</span>
+        <span>目标：全部 21 个元音 + 19 个辅音</span>
+      </div>
+      <div class="focus">
+        <span class="focus-label">本课重点 · <b>第一组元音</b></span>
+        <div class="focus-chips" id="focusChips"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 2. 元音区 ======================= -->
+  <section id="vowels">
+    <div class="section-head">
+      <h2>① 元音区 <span class="sec-kr">모음</span></h2>
+      <p class="hint">共 21 个 · 点击方块或按键盘字母试听</p>
+    </div>
+    <div class="panel">
+      <div id="vowelGroups"></div>
+      <p class="note-inline">
+        <b>试听方式：</b>元音会用「ㅇ＋该元音」合成朗读（如 ㅏ → <b>아</b>），这样发音更完整。
+        复合元音没有单键快捷键，请直接点击方块；右上角显示的是韩文输入法（두벌식）键序，例如 ㅘ = h + k。
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================= 3. 辅音区 ======================= -->
+  <section id="consonants">
+    <div class="section-head">
+      <h2>② 辅音区 <span class="sec-kr">자음</span></h2>
+      <p class="hint">松音 5 · 送气音 5 · 紧音 5 · 鼻音/流音 4</p>
+    </div>
+    <div class="panel">
+      <div id="consonantGroups"></div>
+      <p class="note-inline">
+        <b>试听方式：</b>辅音会用「辅音＋ㅏ」合成朗读（如 ㄱ → <b>가</b>），便于听清辅音本音；
+        ㅇ 作初声不发音，试听为「아」。单独的字母名（기역、니은…）与拼读发音不同，本页统一练「本音」。
+      </p>
+    </div>
+  </section>
+
+  <!-- ======================= 4. 拼读工作台 ======================= -->
+  <section id="workbench">
+    <div class="section-head">
+      <h2>③ 拼读工作台 <span class="sec-kr">조합 연습</span></h2>
+      <p class="hint">选一个辅音 + 一个元音，可再加받침（收音），自动拼成韩字</p>
+    </div>
+    <div class="panel">
+      <div class="wb">
+        <div class="wb-left">
+          <div class="picker">
+            <h3>① 초성 · 初声（辅音）<span>点击即试听</span></h3>
+            <div class="chip-grid" id="wbConsonants"></div>
+          </div>
+          <div class="picker">
+            <h3>② 중성 · 中声（元音）<span>点击即试听</span></h3>
+            <div class="chip-grid" id="wbVowels"></div>
+          </div>
+          <div class="picker">
+            <h3>③ 종성 · 收音（받침，可不选）</h3>
+            <select id="wbFinal" aria-label="选择收音"></select>
+          </div>
+        </div>
+        <div class="wb-result" aria-live="polite">
+          <div class="wb-char" id="wbChar">가</div>
+          <div class="wb-meta">读音 <b id="wbRom">ga</b> · IPA <b id="wbIpa">/ka/</b></div>
+          <div class="wb-break" id="wbBreak"></div>
+          <div class="wb-final-note" id="wbFinalNote"></div>
+          <div class="wb-actions">
+            <button class="btn" id="wbPlay" type="button">🔊 播放音节</button>
+            <button class="btn ghost" id="wbSave" type="button">＋ 加入复习</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 5. 练习模式 ======================= -->
+  <section id="practice">
+    <div class="section-head">
+      <h2>④ 练习模式 <span class="sec-kr">연습</span></h2>
+      <p class="hint">随机出题 · 看字选组合 / 听音选字母 · 自动统计正确率</p>
+    </div>
+    <div class="panel">
+      <div class="pr-head">
+        <div class="pr-type" id="prType">点击「开始练习」生成第一题</div>
+        <div class="pr-stats">
+          正确 <b id="prCorrect">0</b> / 共 <b id="prTotal">0</b> 题 · 正确率 <b id="prAcc">—</b>
+        </div>
+      </div>
+      <div class="pr-card">
+        <div class="pr-prompt" id="prPrompt">?</div>
+        <div class="pr-sub" id="prSub">一种是看韩字选字母组合，一种是听发音选韩字</div>
+        <div class="pr-options" id="prOptions"></div>
+        <div class="pr-feedback" id="prFeedback"></div>
+      </div>
+      <div class="pr-actions">
+        <button class="btn" id="prStart" type="button">开始练习</button>
+        <button class="btn ghost" id="prReplay" type="button" hidden>🔊 再听一次</button>
+        <button class="btn ghost" id="prNext" type="button" disabled>下一题 →</button>
+        <button class="btn ghost" id="prReset" type="button">重置统计</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 6. 复习面板 ======================= -->
+  <section id="review">
+    <div class="section-head">
+      <h2>⑤ 复习面板 <span class="sec-kr">복습</span></h2>
+      <p class="hint">自动保存在本地（localStorage），下次打开仍在</p>
+    </div>
+    <div class="panel">
+      <div class="rev-grid">
+        <div class="rev-col">
+          <h3>点过的字母 <span class="count" id="revLetterCount">0</span></h3>
+          <div class="chips" id="revLetters"></div>
+        </div>
+        <div class="rev-col">
+          <h3>练习/拼过的音节 <span class="count" id="revSylCount">0</span></h3>
+          <div class="chips" id="revSyllables"></div>
+        </div>
+      </div>
+      <div class="rev-actions">
+        <button class="btn ghost" id="revClear" type="button">清空复习记录</button>
+        <span class="rev-tip">点击记录可重复播放；× 可单独移除。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 7. 对照表 ======================= -->
+  <section id="table">
+    <div class="section-head">
+      <h2>⑥ 字母对照表 <span class="sec-kr">대조표</span></h2>
+      <p class="hint">谚文字母 · IPA · 英文近似音标 · 嘴型说明</p>
+    </div>
+
+    <h3 class="group-title" style="margin-top:4px">元音 21 个</h3>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <table>
+        <thead>
+          <tr><th>谚文字母</th><th>IPA</th><th>英文近似音标</th><th>嘴型说明</th></tr>
+        </thead>
+        <tbody id="vowelTable"></tbody>
+      </table>
+    </div>
+
+    <h3 class="group-title">辅音 19 个</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>谚文字母</th><th>IPA</th><th>英文近似音标</th><th>嘴型说明</th></tr>
+        </thead>
+        <tbody id="consonantTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ======================= 8. 发音注意事项 ======================= -->
+  <section id="notes">
+    <div class="section-head">
+      <h2>⑦ 发音注意事项 <span class="sec-kr">발음 주의</span></h2>
+    </div>
+    <div class="panel notes">
+      <!-- 发音自检面板：排查「点到别的音」这类问题 -->
+      <div class="tts-panel" id="ttsSettings">
+        <h4>
+          发音引擎自检 <span class="sec-kr">음성 점검</span>
+          <span class="pill" id="ttsPill">检测中…</span>
+        </h4>
+        <div class="diag">
+          <div class="diag-item"><span class="k">Web Speech API：</span><span class="v" id="diagSupport">—</span></div>
+          <div class="diag-item"><span class="k">可用语音数量：</span><span class="v" id="diagCount">—</span></div>
+          <div class="diag-item"><span class="k">当前使用：</span><span class="v" id="diagVoice">—</span></div>
+          <div class="diag-item"><span class="k">最近朗读文本：</span><span class="v" id="diagLast">—</span></div>
+          <div class="diag-item"><span class="k">最近错误：</span><span class="v" id="diagError">无</span></div>
+          <div class="diag-item"><span class="k">朗读状态：</span><span class="v" id="diagState">—</span></div>
+        </div>
+        <div class="tts-controls" style="margin-bottom:10px">
+          <label for="voiceSelect">指定语音</label>
+          <select id="voiceSelect" aria-label="选择语音"></select>
+          <button class="btn ghost" id="ttsRescan" type="button">重新检测</button>
+        </div>
+        <div class="tts-controls">
+          <span style="font-size:12px;color:var(--muted)">发音模式</span>
+          <div class="tts-mode-group" id="ttsModeGroup" role="group" aria-label="发音模式">
+            <button type="button" data-mode="auto" aria-pressed="true">自动</button>
+            <button type="button" data-mode="ko" aria-pressed="false">强制韩语音色</button>
+            <button type="button" data-mode="zh" aria-pressed="false">中文近似音</button>
+          </div>
+          <button class="btn ghost" id="ttsTest" type="button">▶ 测试「가 나 다」</button>
+        </div>
+      </div>
+
+      <ul>
+        <li><b>以浏览器 TTS 为准，但必须确认用的是韩语音色。</b>本页全部使用 Web Speech API。若系统没有韩语音色，浏览器会<b>静默改用默认音色</b>（中文/英文）去念韩文，听起来就像「点了这个字却发出别的音」。页面顶部出现红色提示时，请到「⑦ 发音注意事项 → 发音引擎自检」查看可用语音，并按指引安装韩语语音包。</li>
+        <li><b>三种发音模式。</b>「自动」优先韩语音色、缺失时退回中文近似音；「强制韩语音色」即使不准也按韩语念；「中文近似音」用中文音色念每个字母的中文近似字（仅字母可用，整音节不可用）。</li>
+        <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 下载韩语（Yuna）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
+        <li><b>单字母是「合成音」。</b>元音用「ㅇ＋元音」、辅音用「辅音＋ㅏ」朗读，目的是听清本音；正式拼读时请以工作台拼出的完整音节为准。</li>
+        <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
+        <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
+        <li><b>紧音 ㄲ ㄸ ㅃ ㅆ ㅉ</b> 是「喉部绷紧、不送气」，不是送气音。TTS 可能读成松音或送气音，听的时候注意短促、有力。</li>
+        <li><b>받침 ㄱ ㄷ ㅂ</b> 读不爆破的 [k̚ t̚ p̚]：只做口型、不放出气流，不要额外加「으」。</li>
+        <li><b>ㅢ · ㅚ · ㅟ</b> 有多个变体读音（如 ㅢ 在助词中常读 /e/），TTS 选择哪一种因语音包而异。</li>
+        <li><b>IPA 是宽式近似标注。</b>没有覆盖连音、紧音化、鼻音化、流音化等音变；拼读工作台展示的是「字母层」读音。</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>韩语谚文拼读练习 · 纯前端单文件（HTML + CSS + JS），无外部依赖、无 CDN。</p>
+    <p>发音由浏览器内置 TTS 提供；学习记录保存在本机浏览器。</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ==========================================================================
+     1. 数据层：元音 / 辅音 / 收音
+     —— idx 是 Unicode 谚文组合用的标准序号，务必不要改动顺序
+     ========================================================================== */
+
+  // 元音 21 个（idx 0~20，按 Unicode 顺序）
+  // zh 字段 = 无韩语音色时的「中文近似音」备用文本（见 TTS 模块说明）
+  var VOWELS = [
+    { ch: 'ㅏ', idx: 0,  rom: 'a',   ipa: 'a',    en: 'a · father',         kbd: 'k',    zh: '啊',  tip: '嘴张大，舌放平，像医生检查喉咙说“啊”' },
+    { ch: 'ㅐ', idx: 1,  rom: 'ae',  ipa: 'ɛ',    en: 'e · bed',            kbd: 'o',    zh: '哎',  tip: '嘴张得比ㅔ大，舌前部抬起，像“哎”' },
+    { ch: 'ㅑ', idx: 2,  rom: 'ya',  ipa: 'ja',   en: 'ya · yard',          kbd: 'i',    zh: '呀',  tip: '先快速发“一”，再滑向“啊”' },
+    { ch: 'ㅒ', idx: 3,  rom: 'yae', ipa: 'jɛ',   en: 'ye · yes',           kbd: '⇧o',   zh: '耶',  tip: '先“一”再滑向“哎”，口型比ㅖ大' },
+    { ch: 'ㅓ', idx: 4,  rom: 'eo',  ipa: 'ʌ',    en: 'uh · sung',          kbd: 'j',    zh: '呃',  tip: '嘴自然张开，舌根稍后缩，双唇不圆（别读成“哦”）' },
+    { ch: 'ㅔ', idx: 5,  rom: 'e',   ipa: 'e',    en: 'e · bed',            kbd: 'p',    zh: '诶',  tip: '嘴张比ㅐ小，舌前部抬起；现代首尔音与ㅐ几乎相同' },
+    { ch: 'ㅕ', idx: 6,  rom: 'yeo', ipa: 'jʌ',   en: 'yuh · young',        kbd: 'u',    zh: '耶',  tip: '先“一”再滑向“ㅓ”，注意不要圆唇' },
+    { ch: 'ㅖ', idx: 7,  rom: 'ye',  ipa: 'je',   en: 'ye · yes',           kbd: '⇧p',   zh: '耶',  tip: '先“一”再滑向“ㅔ”，口型比ㅒ小' },
+    { ch: 'ㅗ', idx: 8,  rom: 'o',   ipa: 'o',    en: 'o · go',             kbd: 'h',    zh: '喔',  tip: '双唇收圆前突，舌根后缩，像说“喔”' },
+    { ch: 'ㅘ', idx: 9,  rom: 'wa',  ipa: 'wa',   en: 'wa · water',         kbd: 'h k',  zh: '哇',  tip: '双唇先圆，再快速打开滑向“啊”' },
+    { ch: 'ㅙ', idx: 10, rom: 'wae', ipa: 'wɛ',   en: 'we · wet',           kbd: 'h o',  zh: '喂',  tip: '圆唇滑向“哎”，与ㅚ/ㅞ 现代几乎同音' },
+    { ch: 'ㅚ', idx: 11, rom: 'oe',  ipa: 'we',   en: 'we',                 kbd: 'h l',  zh: '喂',  tip: '现代多读 we；老派读圆唇的“에” /ø/' },
+    { ch: 'ㅛ', idx: 12, rom: 'yo',  ipa: 'jo',   en: 'yo · yoga',          kbd: 'y',    zh: '哟',  tip: '先“一”再滑向“ㅗ”，双唇收圆' },
+    { ch: 'ㅜ', idx: 13, rom: 'u',   ipa: 'u',    en: 'oo · moon',          kbd: 'n',    zh: '乌',  tip: '双唇紧拢成小圆，舌后缩，像说“乌”' },
+    { ch: 'ㅝ', idx: 14, rom: 'wo',  ipa: 'wʌ',   en: 'wo · wonder',        kbd: 'n j',  zh: '窝',  tip: '圆唇滑向“ㅓ”，注意以不圆唇收尾' },
+    { ch: 'ㅞ', idx: 15, rom: 'we',  ipa: 'we',   en: 'we',                 kbd: 'n p',  zh: '喂',  tip: '圆唇滑向“ㅔ”，与ㅙ/ㅚ 几乎同音' },
+    { ch: 'ㅟ', idx: 16, rom: 'wi',  ipa: 'wi',   en: 'wee',                kbd: 'n l',  zh: '威',  tip: '圆唇滑向“一”，也可读成圆唇的“이”' },
+    { ch: 'ㅠ', idx: 17, rom: 'yu',  ipa: 'ju',   en: 'you',                kbd: 'b',    zh: '优',  tip: '先“一”再滑向“ㅜ”，双唇收圆' },
+    { ch: 'ㅡ', idx: 18, rom: 'eu',  ipa: 'ɯ',    en: 'i-ish · lips spread', kbd: 'm',   zh: '呃',  tip: '嘴角向两边平展（像微笑），舌根后缩，介于“一”和“乌”' },
+    { ch: 'ㅢ', idx: 19, rom: 'ui',  ipa: 'ɰi',   en: 'u-i glide',          kbd: 'm l',  zh: '诶',  tip: '先发“ㅡ”再快速滑向“ㅣ”；词首读 /ɰi/，助词中常读 /e/' },
+    { ch: 'ㅣ', idx: 20, rom: 'i',   ipa: 'i',    en: 'ee · see',           kbd: 'l',    zh: '衣',  tip: '嘴角向两边拉开，舌尖抵下齿，像说“衣”' }
+  ];
+
+  // 辅音 19 个（14 基本 + 5 紧音）。ipaC = 拼字时用的辅音音值
+  // zh 字段 = 无韩语音色时的「中文近似音」备用文本（都带 ㅏ 韵母，如 ㄱ → 嘎）
+  var CONSONANTS = [
+    { ch: 'ㄱ', idx: 0,  name: '기역',      rom: 'g',    ipa: 'k~ɡ',     ipaC: 'k',    en: 'g · go',           kbd: 'r',  zh: '嘎', tip: '舌根抵住软腭后放开，气流轻弱；在元音之间变浊，像英文 g' },
+    { ch: 'ㄷ', idx: 3,  name: '디귿',      rom: 'd',    ipa: 't~d',     ipaC: 't',    en: 'd · dog',          kbd: 'e',  zh: '搭', tip: '舌尖抵上齿龈后放开，气流轻；词中变浊 [d]' },
+    { ch: 'ㅂ', idx: 7,  name: '비읍',      rom: 'b',    ipa: 'p~b',     ipaC: 'p',    en: 'b · boy',          kbd: 'q',  zh: '巴', tip: '双唇闭合后放开，气流轻；词中变浊 [b]' },
+    { ch: 'ㅅ', idx: 9,  name: '시옷',      rom: 's',    ipa: 's~ɕ',     ipaC: 's',    en: 's · see',          kbd: 't',  zh: '撒', tip: '舌尖靠近下齿，气流从齿缝挤出；在ㅣ/ㅑ/ㅕ/ㅛ/ㅠ 前读 [ɕ]，近似“西”' },
+    { ch: 'ㅈ', idx: 12, name: '지읒',      rom: 'j',    ipa: 'tɕ~dʑ',   ipaC: 'tɕ',   en: 'j · jeep',         kbd: 'w',  zh: '咋', tip: '舌面抵硬腭后放开，气流轻；词中变浊 [dʑ]' },
+
+    { ch: 'ㅋ', idx: 15, name: '키읔',      rom: 'k',    ipa: 'kʰ',      ipaC: 'kʰ',   en: 'k · kite',         kbd: 'z',  zh: '卡', tip: '同ㄱ但强送气，手放嘴前能感到明显气流' },
+    { ch: 'ㅌ', idx: 16, name: '티읕',      rom: 't',    ipa: 'tʰ',      ipaC: 'tʰ',   en: 't · top',          kbd: 'x',  zh: '他', tip: '同ㄷ但强送气，舌尖用力弹开' },
+    { ch: 'ㅍ', idx: 17, name: '피읖',      rom: 'p',    ipa: 'pʰ',      ipaC: 'pʰ',   en: 'p · pie',          kbd: 'v',  zh: '怕', tip: '同ㅂ但强送气，双唇用力弹开' },
+    { ch: 'ㅊ', idx: 14, name: '치읓',      rom: 'ch',   ipa: 'tɕʰ',     ipaC: 'tɕʰ',  en: 'ch · cheese',      kbd: 'c',  zh: '叉', tip: '同ㅈ但强送气，纸片放在嘴前会被吹动' },
+    { ch: 'ㅎ', idx: 18, name: '히읗',      rom: 'h',    ipa: 'h',       ipaC: 'h',    en: 'h · hat',          kbd: 'g',  zh: '哈', tip: '喉咙放松送气；在ㄱ/ㄷ/ㅂ/ㅈ 前常弱化甚至不发音' },
+
+    { ch: 'ㄲ', idx: 1,  name: '쌍기역',    rom: 'kk',   ipa: 'k͈',      ipaC: 'k͈',   en: 'k · tense (kk)',   kbd: '⇧r', zh: '嘎', tip: '同ㄱ但喉部绷紧，不送气，短促有力' },
+    { ch: 'ㄸ', idx: 4,  name: '쌍디귿',    rom: 'tt',   ipa: 't͈',      ipaC: 't͈',   en: 't · tense (tt)',   kbd: '⇧e', zh: '打', tip: '舌尖用力抵住再弹开，喉部绷紧，不送气' },
+    { ch: 'ㅃ', idx: 8,  name: '쌍비읍',    rom: 'pp',   ipa: 'p͈',      ipaC: 'p͈',   en: 'p · tense (pp)',   kbd: '⇧q', zh: '巴', tip: '双唇紧闭用力弹开，不送气' },
+    { ch: 'ㅆ', idx: 10, name: '쌍시옷',    rom: 'ss',   ipa: 's͈',      ipaC: 's͈',   en: 'ss · tense',       kbd: '⇧t', zh: '撒', tip: '用力摩擦，比ㅅ更紧、更持久' },
+    { ch: 'ㅉ', idx: 13, name: '쌍지읒',    rom: 'jj',   ipa: 'tɕ͈',     ipaC: 'tɕ͈',  en: 'j · tense (jj)',   kbd: '⇧w', zh: '咋', tip: '舌面绷紧，不送气，短促' },
+
+    { ch: 'ㄴ', idx: 2,  name: '니은',      rom: 'n',    ipa: 'n',       ipaC: 'n',    en: 'n · no',           kbd: 's',  zh: '拿', tip: '舌尖抵上齿龈，气流从鼻腔出' },
+    { ch: 'ㅁ', idx: 6,  name: '미음',      rom: 'm',    ipa: 'm',       ipaC: 'm',    en: 'm · man',          kbd: 'a',  zh: '妈', tip: '双唇闭合，气流从鼻腔出' },
+    { ch: 'ㄹ', idx: 5,  name: '리을',      rom: 'r/l',  ipa: 'ɾ~l',     ipaC: 'ɾ',    en: 'r · pero / l · lily', kbd: 'f', zh: '拉', tip: '舌尖轻弹上齿龈一下（闪音）；作收音时舌尖保持住读 l' },
+    { ch: 'ㅇ', idx: 11, name: '이응',      rom: '',     ipa: '∅~ŋ',     ipaC: '',     en: 'silent / ng · song', kbd: 'd', zh: '啊', tip: '作初声不发音，只占位；作收音读 ng（如 강）' }
+  ];
+
+  // 收音 27 个（idx 0~27，0 = 无收音）
+  var FINALS = [
+    { idx: 0,  ch: '—', rom: '',   ipa: '' },
+    { idx: 1,  ch: 'ㄱ', rom: 'k',  ipa: 'k̚' },
+    { idx: 2,  ch: 'ㄲ', rom: 'k',  ipa: 'k̚' },
+    { idx: 3,  ch: 'ㄳ', rom: 'k',  ipa: 'k̚' },
+    { idx: 4,  ch: 'ㄴ', rom: 'n',  ipa: 'n' },
+    { idx: 5,  ch: 'ㄵ', rom: 'n',  ipa: 'n' },
+    { idx: 6,  ch: 'ㄶ', rom: 'n',  ipa: 'n' },
+    { idx: 7,  ch: 'ㄷ', rom: 't',  ipa: 't̚' },
+    { idx: 8,  ch: 'ㄹ', rom: 'l',  ipa: 'l' },
+    { idx: 9,  ch: 'ㄺ', rom: 'k',  ipa: 'k̚' },
+    { idx: 10, ch: 'ㄻ', rom: 'm',  ipa: 'm' },
+    { idx: 11, ch: 'ㄼ', rom: 'l',  ipa: 'l' },
+    { idx: 12, ch: 'ㄽ', rom: 'l',  ipa: 'l' },
+    { idx: 13, ch: 'ㄾ', rom: 'l',  ipa: 'l' },
+    { idx: 14, ch: 'ㄿ', rom: 'p',  ipa: 'p̚' },
+    { idx: 15, ch: 'ㅀ', rom: 'l',  ipa: 'l' },
+    { idx: 16, ch: 'ㅁ', rom: 'm',  ipa: 'm' },
+    { idx: 17, ch: 'ㅂ', rom: 'p',  ipa: 'p̚' },
+    { idx: 18, ch: 'ㅄ', rom: 'p',  ipa: 'p̚' },
+    { idx: 19, ch: 'ㅅ', rom: 't',  ipa: 't̚' },
+    { idx: 20, ch: 'ㅆ', rom: 't',  ipa: 't̚' },
+    { idx: 21, ch: 'ㅇ', rom: 'ng', ipa: 'ŋ' },
+    { idx: 22, ch: 'ㅈ', rom: 't',  ipa: 't̚' },
+    { idx: 23, ch: 'ㅊ', rom: 't',  ipa: 't̚' },
+    { idx: 24, ch: 'ㅋ', rom: 'k',  ipa: 'k̚' },
+    { idx: 25, ch: 'ㅌ', rom: 't',  ipa: 't̚' },
+    { idx: 26, ch: 'ㅍ', rom: 'p',  ipa: 'p̚' },
+    { idx: 27, ch: 'ㅎ', rom: 't',  ipa: 't̚' }
+  ];
+
+  var VOWEL_MAP = new Map(VOWELS.map(function (v) { return [v.ch, v]; }));
+  var CONS_MAP  = new Map(CONSONANTS.map(function (c) { return [c.ch, c]; }));
+  var FINAL_MAP = new Map(FINALS.map(function (f) { return [f.ch, f]; }));
+
+  var FOCUS_VOWELS = ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ']; // 第一组元音
+
+  // 练习出题优先使用「常用音节」，避免出现过于生僻的组合
+  var BASIC_INITIALS = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ'];
+  var BASIC_VOWELS = ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅐ', 'ㅔ'];
+  var COMMON_FINALS = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅇ'];
+
+  // 键盘映射：基于 KeyboardEvent.code，避免输入法与大小写影响
+  var CONS_KEYS = {
+    KeyR: 'ㄱ', KeyS: 'ㄴ', KeyE: 'ㄷ', KeyF: 'ㄹ', KeyA: 'ㅁ',
+    KeyQ: 'ㅂ', KeyT: 'ㅅ', KeyD: 'ㅇ', KeyW: 'ㅈ', KeyC: 'ㅊ',
+    KeyZ: 'ㅋ', KeyX: 'ㅌ', KeyV: 'ㅍ', KeyG: 'ㅎ'
+  };
+  var CONS_KEYS_SHIFT = { KeyR: 'ㄲ', KeyE: 'ㄸ', KeyQ: 'ㅃ', KeyT: 'ㅆ', KeyW: 'ㅉ' };
+  var VOWEL_KEYS = {
+    KeyK: 'ㅏ', KeyO: 'ㅐ', KeyI: 'ㅑ', KeyJ: 'ㅓ', KeyP: 'ㅔ', KeyU: 'ㅕ',
+    KeyH: 'ㅗ', KeyY: 'ㅛ', KeyN: 'ㅜ', KeyB: 'ㅠ', KeyM: 'ㅡ', KeyL: 'ㅣ'
+  };
+  var VOWEL_KEYS_SHIFT = { KeyO: 'ㅒ', KeyP: 'ㅖ' };
+
+  /* ==========================================================================
+     2. 工具函数
+     ========================================================================== */
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // 谚文组合核心公式
+  function compose(iniIdx, vowIdx, finIdx) {
+    return String.fromCharCode(0xAC00 + (iniIdx * 21 + vowIdx) * 28 + (finIdx || 0));
+  }
+  function romanize(ini, vow, fin) {
+    return (ini.ch === 'ㅇ' ? '' : ini.rom) + vow.rom + (fin.rom || '');
+  }
+  function ipaOf(ini, vow, fin) {
+    return '/' + ini.ipaC + vow.ipa + (fin.ipa || '') + '/';
+  }
+
+  var storageOK = true;
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); }
+  catch (err) { storageOK = false; }
+
+  /* ==========================================================================
+     3. 本地存储 / 全局状态
+     ========================================================================== */
+  var STORE_KEY = 'hangul-phonics-v1';
+
+  var Store = {
+    data: {
+      learned: [],            // 听过的字母
+      reviewLetters: [],      // 复习：字母
+      reviewSyllables: [],    // 复习：音节
+      stats: { correct: 0, total: 0 },
+      theme: null,
+      ttsMode: 'auto',        // auto | ko | zh
+      voiceURI: ''            // 手动指定的语音
+    },
+    load: function () {
+      try {
+        var raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return;
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.learned)) this.data.learned = parsed.learned;
+        if (Array.isArray(parsed.reviewLetters)) this.data.reviewLetters = parsed.reviewLetters;
+        if (Array.isArray(parsed.reviewSyllables)) this.data.reviewSyllables = parsed.reviewSyllables;
+        if (parsed.stats && typeof parsed.stats.total === 'number') {
+          this.data.stats = {
+            correct: Number(parsed.stats.correct) || 0,
+            total: Number(parsed.stats.total) || 0
+          };
+        }
+        if (parsed.theme) this.data.theme = parsed.theme;
+        if (parsed.ttsMode) this.data.ttsMode = parsed.ttsMode;
+        if (parsed.voiceURI) this.data.voiceURI = parsed.voiceURI;
+      } catch (e) { /* 损坏的数据直接忽略 */ }
+    },
+    save: function () {
+      if (!storageOK) return;
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(this.data)); } catch (e) {}
+    },
+    learn: function (ch) {
+      if (!ch || this.data.learned.indexOf(ch) !== -1) return;
+      this.data.learned.push(ch);
+      this.save();
+      Progress.render();
+    },
+    addReviewLetter: function (ch) {
+      var list = this.data.reviewLetters;
+      var i = list.indexOf(ch);
+      if (i !== -1) list.splice(i, 1);
+      list.unshift(ch);
+      if (list.length > 80) list.length = 80;
+      this.save();
+      Review.render();
+    },
+    addReviewSyllable: function (ch) {
+      var list = this.data.reviewSyllables;
+      var i = list.indexOf(ch);
+      if (i !== -1) list.splice(i, 1);
+      list.unshift(ch);
+      if (list.length > 80) list.length = 80;
+      this.save();
+      Review.render();
+    }
+  };
+
+  /* ==========================================================================
+     4. TTS 模块（Web Speech API）
+
+     ★ 关键设计：浏览器在没有「韩语音色」时，不会报错，而是静默地用默认音色
+       （常见是中文音色）去念韩文字符 —— 这就是「点了 ㅏ 却听到别的音」的原因。
+       因此这里必须显式选择音色，并在找不到韩语音色时：
+         1) 明确告知用户（顶栏 + 页面横幅 + 自检面板）
+         2) 可选用「中文近似音」兜底（每个字母都标了 zh 近似文本）
+     ========================================================================== */
+  var TTS = {
+    supported: ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window),
+    voices: [],
+    koVoice: null,
+    zhVoice: null,
+    chosenURI: '',      // 用户手动指定的语音（空 = 自动）
+    mode: 'auto',       // auto | ko | zh
+    lastText: '',
+    lastError: '',
+    lastState: '',
+    timer: null,
+    token: 0,
+    scanTries: 0,
+
+    init: function () {
+      if (!this.supported) {
+        this.panel();
+        this.banner('当前浏览器不支持 Web Speech API，无法朗读。建议使用 Chrome 或 Edge。', true);
+        setTtsStatus('浏览器不支持语音合成', 'warn');
+        return;
+      }
+      this.chosenURI = Store.data.voiceURI || '';
+      this.mode = Store.data.ttsMode || 'auto';
+
+      var self = this;
+      var onVoices = function () { self.refresh(); };
+      if (typeof speechSynthesis.addEventListener === 'function') {
+        speechSynthesis.addEventListener('voiceschanged', onVoices);
+      } else {
+        speechSynthesis.onvoiceschanged = onVoices;
+      }
+
+      this.refresh();
+      // 部分浏览器（含 file:// 打开时）首次 getVoices() 为空，需要轮询几次
+      var poll = setInterval(function () {
+        self.scanTries++;
+        self.refresh(true);
+        if (self.koVoice || self.scanTries >= 10) clearInterval(poll);
+      }, 500);
+    },
+
+    /* 扫描语音列表并更新全部 UI */
+    refresh: function (silent) {
+      if (!this.supported) return;
+      this.voices = (speechSynthesis.getVoices() || []).slice();
+
+      this.koVoice = this.pickVoice(/^ko/i);
+      this.zhVoice = this.pickVoice(/^zh/i);
+
+      // 用户在设置里手动指定了语音时优先使用
+      if (this.chosenURI) {
+        for (var i = 0; i < this.voices.length; i++) {
+          if (this.voices[i].voiceURI === this.chosenURI) {
+            if (/^ko/i.test(this.voices[i].lang || '')) this.koVoice = this.voices[i];
+            else if (/^zh/i.test(this.voices[i].lang || '')) this.zhVoice = this.voices[i];
+            break;
+          }
+        }
+      }
+
+      this.updateStatus(silent);
+      this.panel();
+    },
+
+    pickVoice: function (re) {
+      var list = this.voices.filter(function (v) { return re.test(v.lang || ''); });
+      if (!list.length) return null;
+      // 优先本地音色，其次名字里带 Google / Natural / Online 的（通常更自然）
+      var score = function (v) {
+        var s = 0;
+        if (v.localService) s += 2;
+        if (/google|natural|online|yuna|heami|sunhi|jimin/i.test(v.name || '')) s += 3;
+        if (/^ko-KR$/i.test(v.lang || '')) s += 1;
+        return s;
+      };
+      return list.sort(function (a, b) { return score(b) - score(a); })[0];
+    },
+
+    /* 当前真正生效的模式 */
+    activeMode: function () {
+      if (this.mode === 'zh') return this.zhVoice ? 'zh' : 'ko';
+      if (this.mode === 'ko') return 'ko';
+      if (this.koVoice) return 'ko';
+      return this.zhVoice ? 'zh' : 'ko'; // 都没有就硬着头皮用 ko-KR
+    },
+
+    updateStatus: function (silent) {
+      if (!this.supported) return;
+      var m = this.activeMode();
+      if (m === 'ko' && this.koVoice) {
+        setTtsStatus('韩语音色 · ' + this.koVoice.name, 'ok');
+        this.banner('', false);
+      } else if (m === 'zh') {
+        setTtsStatus('中文近似音（无韩语音色）', 'warn');
+        this.banner(
+          '未检测到韩语音色，已启用<b>中文近似音</b>兜底：单个字母的发音接近正确，' +
+          '但整音节（如 넉、즤）无法准确朗读，练习模式会自动只出「看字选组合」题。',
+          false
+        );
+      } else {
+        setTtsStatus('未检测到韩语音色', 'warn');
+        this.banner(
+          '未检测到韩语音色：浏览器会用系统默认音色去念韩文，听起来像「别的音」。' +
+          '请安装韩语语音包，或切到「中文近似音」模式。',
+          true
+        );
+      }
+    },
+
+    banner: function (html, isError) {
+      var el = $('#ttsBanner');
+      if (!el) return;
+      if (!html) {
+        el.className = 'tts-banner';
+        el.innerHTML = '';
+        return;
+      }
+      el.className = 'tts-banner show' + (isError ? '' : ' ok');
+      el.innerHTML = (isError ? '⚠️ ' : 'ℹ️ ') + html +
+        '<div class="bn-actions">' +
+        '<button class="btn" type="button" data-act="rescan">重新检测语音</button>' +
+        '<button class="btn ghost" type="button" data-act="settings">发音设置 / 安装指引</button>' +
+        '</div>';
+    },
+
+    /* 刷新自检面板 */
+    panel: function () {
+      var $s = $('#diagSupport');
+      if (!$s) return;
+      var m = this.activeMode();
+      $s.textContent = this.supported ? '可用' : '不可用';
+      $('#diagCount').textContent = this.voices.length + ' 个' +
+        (this.voices.length ? '（' + Array.from(new Set(this.voices.map(function (v) { return v.lang; }))).join(', ') + '）' : '');
+      $('#diagVoice').textContent = m === 'zh'
+        ? (this.zhVoice ? this.zhVoice.name + ' [zh 近似]' : '无')
+        : (this.koVoice ? this.koVoice.name + ' [ko]' : '无韩语音色 → 使用默认音色');
+      $('#diagLast').textContent = this.lastText || '—';
+      $('#diagError').textContent = this.lastError || '无';
+      $('#diagState').textContent = this.supported
+        ? (speechSynthesis.speaking ? '正在朗读' : (speechSynthesis.pending ? '排队中' : '空闲'))
+        : '—';
+
+      var pill = $('#ttsPill');
+      if (!this.supported) { pill.className = 'pill bad'; pill.textContent = '不可用'; }
+      else if (m === 'zh') { pill.className = 'pill bad'; pill.textContent = '无韩语音色 · 近似音'; }
+      else if (this.koVoice) { pill.className = 'pill good'; pill.textContent = '韩语音色就绪'; }
+      else { pill.className = 'pill bad'; pill.textContent = '无韩语音色 · 可能读错'; }
+
+      // 语音下拉
+      var sel = $('#voiceSelect');
+      if (sel && sel.dataset.built !== String(this.voices.length)) {
+        var opts = ['<option value="">自动选择（推荐）</option>'];
+        this.voices.forEach(function (v) {
+          opts.push('<option value="' + v.voiceURI + '">' + v.name + ' · ' + v.lang +
+            (v.localService ? ' · 本地' : ' · 在线') + '</option>');
+        });
+        sel.innerHTML = opts.join('');
+        sel.dataset.built = String(this.voices.length);
+        sel.value = this.chosenURI || '';
+      }
+
+      // 模式按钮
+      $$('#ttsModeGroup button').forEach(function (b) {
+        b.setAttribute('aria-pressed', b.dataset.mode === TTS.mode ? 'true' : 'false');
+      });
+
+      // 同步依赖「整音节朗读」的按钮
+      if (typeof syncAudioUI === 'function') syncAudioUI();
+    },
+
+    /* 朗读入口
+       koText：韩文（正常路径）
+       zhText：无韩语音色时的中文近似（可选）
+       opts.rate 语速 */
+    speak: function (koText, opts) {
+      opts = opts || {};
+      if (!this.supported) return false;
+      var mode = this.activeMode();
+      var text = (mode === 'zh' && opts.zhText) ? opts.zhText : koText;
+      if (!text) return false;
+
+      var lang, voice;
+      if (mode === 'zh') {
+        voice = this.zhVoice;
+        lang = (voice && voice.lang) || 'zh-CN';
+      } else {
+        voice = this.koVoice;
+        lang = (voice && voice.lang) || 'ko-KR';
+      }
+
+      var self = this;
+      var token = ++this.token;
+      var rate = opts.rate || 0.85;
+
+      var run = function () {
+        if (self.token !== token) return; // 已被新的朗读请求取代
+        try {
+          var u = new SpeechSynthesisUtterance(text);
+          u.lang = lang;
+          // 个别浏览器的 voice 对象不可赋值，赋值失败就退回只用 lang
+          try { if (voice) u.voice = voice; } catch (e) { u.lang = lang; }
+          u.rate = rate;
+          u.pitch = 1;
+          u.volume = 1;
+          u.onstart = function () {
+            self.lastState = '朗读中';
+            self.lastError = '';
+          };
+          u.onerror = function (e) {
+            var code = (e && e.error) || 'unknown';
+            // interrupted / canceled 是我们主动打断上一句时产生的，属正常情况
+            if (code !== 'interrupted' && code !== 'canceled') self.lastError = code;
+            self.panel();
+          };
+          u.onend = function () { self.lastState = '结束'; };
+          self.lastText = text;
+          speechSynthesis.speak(u);
+        } catch (err) {
+          self.lastError = String(err && err.message || err);
+        }
+        self.panel();
+      };
+
+      // 正在朗读时先 cancel，再等一下重新开始（Chrome 里 cancel 后同一 tick 调 speak 会丢失）
+      // 空闲时同步调用，保留用户手势（Safari / iOS 需要）
+      if (speechSynthesis.speaking || speechSynthesis.pending) {
+        try { speechSynthesis.cancel(); } catch (e) {}
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(run, 70);
+      } else {
+        try { speechSynthesis.resume(); } catch (e) {}
+        run();
+      }
+      this.panel();
+      return true;
+    }
+  };
+
+  function setTtsStatus(text, kind, detail) {
+    var el = $('#ttsStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'tts-status' + (kind ? ' ' + kind : '');
+    el.title = detail || text;
+  }
+
+  // 把「单个字母」转成适合朗读的发音；zh 字段用于无韩语音色时的近似朗读
+  function speakLetter(ch, opts) {
+    opts = opts || {};
+    var v = VOWEL_MAP.get(ch);
+    if (v) {
+      return TTS.speak(compose(11, v.idx, 0), { zhText: v.zh, rate: opts.rate }); // ㅇ + 元音
+    }
+    var c = CONS_MAP.get(ch);
+    if (c) {
+      return TTS.speak(compose(c.idx, 0, 0), { zhText: c.zh, rate: opts.rate });   // 辅音 + ㅏ
+    }
+    return TTS.speak(ch, { zhText: ch, rate: opts.rate });
+  }
+
+  // 统一的「播放字母」入口：发音 + 记进度 + 记复习
+  function playLetter(ch) {
+    speakLetter(ch);
+    Store.learn(ch);
+    Store.addReviewLetter(ch);
+    flashTile(ch);
+  }
+
+  function flashTile(ch) {
+    var tiles = $$('.tile[data-ch="' + ch + '"]');
+    tiles.forEach(function (tile) {
+      tile.classList.add('playing');
+      setTimeout(function () { tile.classList.remove('playing'); }, 420);
+    });
+  }
+
+  /* ==========================================================================
+     5. 进度模块
+     ========================================================================== */
+  var Progress = {
+    total: VOWELS.length + CONSONANTS.length, // 21 + 19 = 40
+    render: function () {
+      var n = Store.data.learned.length;
+      var pct = this.total ? Math.round(n / this.total * 100) : 0;
+      $('#progressCount').textContent = n + ' / ' + this.total;
+      $('#progressPct').textContent = pct + '%';
+      $('#progressFill').style.width = pct + '%';
+
+      // 本课重点勾选状态
+      $$('#focusChips .fchip').forEach(function (chip) {
+        chip.classList.toggle('done', Store.data.learned.indexOf(chip.dataset.ch) !== -1);
+      });
+      // 字母方块勾选状态
+      $$('.tile').forEach(function (tile) {
+        tile.classList.toggle('learned', Store.data.learned.indexOf(tile.dataset.ch) !== -1);
+      });
+      Review.updateTitles();
+    },
+    initFocus: function () {
+      $('#focusChips').innerHTML = FOCUS_VOWELS.map(function (ch) {
+        var v = VOWEL_MAP.get(ch);
+        return '<button class="fchip" type="button" data-ch="' + ch + '" title="' + v.en + ' ｜ ' + v.tip + '">' +
+          '<span class="fc-char">' + ch + '</span>' +
+          '<span class="fc-ipa">/' + v.ipa + '/</span>' +
+          '</button>';
+      }).join('');
+    }
+  };
+
+  /* ==========================================================================
+     6. 复习面板模块
+     ========================================================================== */
+  var Review = {
+    render: function () {
+      var letters = Store.data.reviewLetters;
+      var syls = Store.data.reviewSyllables;
+
+      $('#revLetterCount').textContent = letters.length;
+      $('#revSylCount').textContent = syls.length;
+
+      $('#revLetters').innerHTML = letters.length
+        ? letters.map(function (ch) {
+            return '<span class="rev-item">' +
+              '<button class="rev-play" type="button" data-kind="letter" data-ch="' + ch + '" title="点击播放">' + ch + '</button>' +
+              '<button class="rev-del" type="button" data-kind="letter" data-ch="' + ch + '" aria-label="移除 ' + ch + '">×</button>' +
+              '</span>';
+          }).join('')
+        : '<span class="empty">还没有点击过字母</span>';
+
+      $('#revSyllables').innerHTML = syls.length
+        ? syls.map(function (ch) {
+            return '<span class="rev-item">' +
+              '<button class="rev-play" type="button" data-kind="syllable" data-ch="' + ch + '" title="点击播放">' + ch + '</button>' +
+              '<button class="rev-del" type="button" data-kind="syllable" data-ch="' + ch + '" aria-label="移除 ' + ch + '">×</button>' +
+              '</span>';
+          }).join('')
+        : '<span class="empty">练习或拼读后会自动出现</span>';
+    },
+    updateTitles: function () {
+      var tip = $('#storageTip');
+      if (!tip) return;
+      tip.textContent = storageOK
+        ? '记录保存在本机浏览器，换设备/清缓存会丢失。'
+        : '当前浏览器禁止本地存储，记录不会被保存。';
+    }
+  };
+
+  /* ==========================================================================
+     7. 字母区渲染
+     ========================================================================== */
+  function tileHTML(item) {
+    var title = (item.name ? item.name + ' ｜ ' : '') + item.en + ' ｜ ' + item.tip;
+    return '<button class="tile" type="button" data-ch="' + item.ch + '" title="' + title + '">' +
+      '<span class="tile-key">' + item.kbd + '</span>' +
+      '<span class="tile-char">' + item.ch + '</span>' +
+      '<span class="tile-ipa">/' + item.ipa + '/</span>' +
+      '<span class="tile-en">' + item.en + '</span>' +
+      '<span class="tile-tip">' + item.tip + '</span>' +
+      '</button>';
+  }
+
+  var VOWEL_GROUPS = [
+    { title: '单元音 · 기본 모음', list: ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅐ', 'ㅔ'] },
+    { title: '复元音 · y 系列', list: ['ㅑ', 'ㅕ', 'ㅛ', 'ㅠ', 'ㅒ', 'ㅖ'] },
+    { title: '复元音 · w 系列 / 其他', list: ['ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'] }
+  ];
+  var CONS_GROUPS = [
+    { title: '松音 · 평음', list: ['ㄱ', 'ㄷ', 'ㅂ', 'ㅅ', 'ㅈ'] },
+    { title: '送气音 · 격음', list: ['ㅋ', 'ㅌ', 'ㅍ', 'ㅊ', 'ㅎ'] },
+    { title: '紧音 · 경음', list: ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'] },
+    { title: '鼻音 · 流音', list: ['ㄴ', 'ㅁ', 'ㄹ', 'ㅇ'] }
+  ];
+
+  function renderLetterSections() {
+    $('#vowelGroups').innerHTML = VOWEL_GROUPS.map(function (g) {
+      return '<div class="group">' +
+        '<h3 class="group-title">' + g.title + '</h3>' +
+        '<div class="grid">' + g.list.map(function (ch) { return tileHTML(VOWEL_MAP.get(ch)); }).join('') + '</div>' +
+        '</div>';
+    }).join('');
+
+    $('#consonantGroups').innerHTML = CONS_GROUPS.map(function (g) {
+      return '<div class="group">' +
+        '<h3 class="group-title">' + g.title + '</h3>' +
+        '<div class="grid">' + g.list.map(function (ch) { return tileHTML(CONS_MAP.get(ch)); }).join('') + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  /* ==========================================================================
+     8. 拼读工作台模块
+     ========================================================================== */
+  var WB = {
+    iniIdx: 0,  // ㄱ
+    vowIdx: 0,  // ㅏ
+    finIdx: 0,  // 无收音
+    saveTimer: null,
+
+    init: function () {
+      // 初声：按韩文字母顺序排列
+      var initials = CONS_MAP.size
+        ? CONSONANTS.slice().sort(function (a, b) { return a.idx - b.idx; })
+        : [];
+      $('#wbConsonants').innerHTML = initials.map(function (c) {
+        return '<button class="chip" type="button" data-ch="' + c.ch + '" data-idx="' + c.idx + '" title="' + c.name + '">' + c.ch + '</button>';
+      }).join('');
+
+      // 中声
+      var vowels = VOWELS.slice().sort(function (a, b) { return a.idx - b.idx; });
+      $('#wbVowels').innerHTML = vowels.map(function (v) {
+        return '<button class="chip" type="button" data-ch="' + v.ch + '" data-idx="' + v.idx + '" title="' + v.en + '">' + v.ch + '</button>';
+      }).join('');
+
+      // 收音
+      $('#wbFinal').innerHTML = FINALS.map(function (f) {
+        return '<option value="' + f.idx + '">' + (f.idx === 0 ? '— 无收音' : f.ch) + '</option>';
+      }).join('');
+
+      this.render();
+    },
+
+    render: function () {
+      var ini = CONS_MAP.get(this.iniCh);
+      var vow = VOWELS[this.vowIdx];
+      var fin = FINALS[this.finIdx];
+      if (!ini || !vow || !fin) return;
+
+      var ch = compose(ini.idx, vow.idx, fin.idx);
+      $('#wbChar').textContent = ch;
+      $('#wbRom').textContent = romanize(ini, vow, fin) || '—';
+      $('#wbIpa').textContent = ipaOf(ini, vow, fin);
+
+      var parts = [ini.ch + ' (초성)', vow.ch + ' (중성)'];
+      if (fin.idx) parts.push(fin.ch + ' (종성)');
+      $('#wbBreak').textContent = parts.join('  +  ');
+
+      $('#wbFinalNote').textContent = fin.idx
+        ? '받침 ' + fin.ch + ' 读 [' + fin.ipa + ']，不爆破：只做口型、不放出气流。'
+        : '받침 可以不加；加上后韵尾会改变音节的收尾。';
+
+      $('#wbFinal').value = String(fin.idx);
+
+      $$('#wbConsonants .chip').forEach(function (c) {
+        c.classList.toggle('sel', c.dataset.ch === ini.ch);
+      });
+      $$('#wbVowels .chip').forEach(function (c) {
+        c.classList.toggle('sel', Number(c.dataset.idx) === vow.idx);
+      });
+    },
+
+    get iniCh() {
+      for (var i = 0; i < CONSONANTS.length; i++) {
+        if (CONSONANTS[i].idx === this.iniIdx) return CONSONANTS[i].ch;
+      }
+      return 'ㄱ';
+    }
+  };
+
+  /* ==========================================================================
+     9. 练习模块
+     ========================================================================== */
+  var Practice = {
+    q: null,
+    answered: false,
+
+    init: function () {
+      this.renderStats();
+    },
+
+    randomParts: function () {
+      // 72% 概率从常用字母中取，兼顾学习效率与随机性
+      var ini = Math.random() < 0.72 ? CONS_MAP.get(pick(BASIC_INITIALS)) : pick(CONSONANTS);
+      var vow = Math.random() < 0.72 ? VOWEL_MAP.get(pick(BASIC_VOWELS)) : pick(VOWELS);
+      var fin = FINALS[0];
+      if (Math.random() < 0.22) {
+        fin = Math.random() < 0.75 ? FINAL_MAP.get(pick(COMMON_FINALS)) : pick(FINALS.slice(1));
+      }
+      return { ini: ini, vow: vow, fin: fin, ch: compose(ini.idx, vow.idx, fin.idx) };
+    },
+
+    comboLabel: function (p) {
+      var s = p.ini.ch + ' + ' + p.vow.ch;
+      if (p.fin.idx) s += ' + ' + p.fin.ch;
+      return s;
+    },
+
+    makeQuestion: function (type) {
+      var p = this.randomParts();
+      var answerLabel = this.comboLabel(p);
+      var options = [];
+      var guard = 0;
+
+      if (type === 'compose') {
+        options.push(answerLabel);
+        while (options.length < 4 && guard++ < 500) {
+          var alt = this.randomParts();
+          if (alt.ch === p.ch) continue;
+          var label = this.comboLabel(alt);
+          if (options.indexOf(label) !== -1) continue;
+          options.push(label);
+        }
+      } else {
+        options.push(p.ch);
+        while (options.length < 4 && guard++ < 500) {
+          var alt2 = this.randomParts();
+          if (options.indexOf(alt2.ch) !== -1) continue;
+          options.push(alt2.ch);
+        }
+      }
+
+      return {
+        type: type,
+        parts: p,
+        ch: p.ch,
+        answerLabel: answerLabel,
+        options: shuffle(options)
+      };
+    },
+
+    next: function () {
+      this.answered = false;
+      $('#prStart').hidden = true;
+      $('#prNext').disabled = true;
+      $('#prFeedback').textContent = '';
+      $('#prFeedback').className = 'pr-feedback';
+
+      // 两种题型交替出现，保证「看字选组合」和「听音选字母」都能练到
+      var type = this.lastType === 'compose' ? 'listen' : 'compose';
+      // 没有韩语音色时，整音节无法准确朗读 → 只出「看字选组合」，避免练出错误记忆
+      if (type === 'listen' && TTS.activeMode() !== 'ko') type = 'compose';
+      this.lastType = type;
+      this.q = this.makeQuestion(type);
+      this.render();
+    },
+
+    render: function () {
+      var q = this.q;
+      if (!q) return;
+      var self = this;
+
+      $('#prType').textContent = q.type === 'compose'
+        ? '题型：看字选组合'
+        : '题型：听音选字母';
+      $('#prSub').textContent = q.type === 'compose'
+        ? '选出组成这个字的辅音 + 元音（+ 收音）'
+        : '听发音，选出对应的韩字';
+      $('#prPrompt').textContent = q.type === 'compose' ? q.ch : '🔊';
+      // 无韩语音色时，整音节朗读不可靠，隐藏「再听一次」
+      $('#prReplay').hidden = q.type !== 'listen' && TTS.activeMode() !== 'ko';
+
+      $('#prOptions').innerHTML = q.options.map(function (val, i) {
+        var cls = 'opt' + (q.type === 'listen' ? ' syl' : '');
+        return '<button class="' + cls + '" type="button" data-val="' + val + '">' + val + '</button>';
+      }).join('');
+
+      // 听力题自动播放一次
+      if (q.type === 'listen') TTS.speak(q.ch, { rate: 0.8 });
+
+      $$('#prOptions .opt').forEach(function (btn) {
+        btn.addEventListener('click', function () { self.answer(btn.dataset.val, btn); });
+      });
+    },
+
+    answer: function (val, btn) {
+      if (this.answered || !this.q) return;
+      this.answered = true;
+
+      var q = this.q;
+      var correctVal = q.type === 'compose' ? q.answerLabel : q.ch;
+      var ok = (val === correctVal);
+
+      // 统计
+      Store.data.stats.total += 1;
+      if (ok) Store.data.stats.correct += 1;
+      Store.save();
+      this.renderStats();
+
+      // 练习过的音节进入复习
+      Store.addReviewSyllable(q.ch);
+
+      // 高亮选项
+      var buttons = $$('#prOptions .opt');
+      buttons.forEach(function (b) {
+        b.disabled = true;
+        if (b.dataset.val === correctVal) b.classList.add('correct');
+      });
+      if (!ok && btn) btn.classList.add('wrong');
+
+      // 反馈
+      var fb = $('#prFeedback');
+      if (ok) {
+        fb.textContent = q.type === 'compose'
+          ? '✓ 正确！' + correctVal + ' ＝ ' + q.ch
+          : '✓ 正确！' + q.ch + ' ＝ ' + q.answerLabel;
+        fb.className = 'pr-feedback ok';
+      } else {
+        fb.textContent = q.type === 'compose'
+          ? '✗ 正确答案：' + correctVal + '（' + q.ch + '）'
+          : '✗ 正确答案：' + q.ch + '（' + q.answerLabel + '）';
+        fb.className = 'pr-feedback bad';
+      }
+
+      if (TTS.activeMode() === 'ko') TTS.speak(q.ch, { rate: 0.8 });
+      $('#prNext').disabled = false;
+      $('#prNext').focus();
+    },
+
+    renderStats: function () {
+      var s = Store.data.stats;
+      var acc = s.total ? Math.round(s.correct / s.total * 100) : null;
+      $('#prCorrect').textContent = s.correct;
+      $('#prTotal').textContent = s.total;
+      $('#prAcc').textContent = acc === null ? '—' : acc + '%';
+    }
+  };
+
+  /* ==========================================================================
+     10. 对照表渲染
+     ========================================================================== */
+  var VOWEL_TABLE_GROUPS = [
+    { title: '单元音 · 기본 모음', list: ['ㅏ', 'ㅓ', 'ㅗ', 'ㅜ', 'ㅡ', 'ㅣ', 'ㅐ', 'ㅔ'] },
+    { title: '复元音 · y 系列', list: ['ㅑ', 'ㅕ', 'ㅛ', 'ㅠ', 'ㅒ', 'ㅖ'] },
+    { title: '复元音 · w 系列 / 其他', list: ['ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'] }
+  ];
+  var CONS_TABLE_GROUPS = [
+    { title: '松音 · 평음', list: ['ㄱ', 'ㄷ', 'ㅂ', 'ㅅ', 'ㅈ'] },
+    { title: '送气音 · 격음', list: ['ㅋ', 'ㅌ', 'ㅍ', 'ㅊ', 'ㅎ'] },
+    { title: '紧音 · 경음', list: ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'] },
+    { title: '鼻音 · 流音', list: ['ㄴ', 'ㅁ', 'ㄹ', 'ㅇ'] }
+  ];
+
+  function tableHTML(groups, map) {
+    return groups.map(function (g) {
+      var rows = g.list.map(function (ch) {
+        var item = map.get(ch);
+        return '<tr>' +
+          '<td class="t-letter">' + item.ch + '<span class="t-kbd">' + item.kbd + '</span></td>' +
+          '<td class="t-ipa">/' + item.ipa + '/</td>' +
+          '<td class="t-en">' + item.en + '</td>' +
+          '<td class="t-tip">' + item.tip + '</td>' +
+          '</tr>';
+      }).join('');
+      return '<tr class="group-row"><td colspan="4">' + g.title + '</td></tr>' + rows;
+    }).join('');
+  }
+
+  function renderTables() {
+    $('#vowelTable').innerHTML = tableHTML(VOWEL_TABLE_GROUPS, VOWEL_MAP);
+    $('#consonantTable').innerHTML = tableHTML(CONS_TABLE_GROUPS, CONS_MAP);
+  }
+
+  /* ==========================================================================
+     11. 主题切换
+     ========================================================================== */
+  function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    var btn = $('#themeBtn');
+    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    btn.setAttribute('aria-label', theme === 'dark' ? '切换到浅色模式' : '切换到夜间模式');
+    Store.data.theme = theme;
+    Store.save();
+  }
+
+  /* ==========================================================================
+     11.5 发音可用性辅助
+     ========================================================================== */
+
+  // 只有存在韩语音色时，整音节朗读才可靠
+  function canSpeakSyllable() {
+    return TTS.activeMode() === 'ko' && !!TTS.koVoice;
+  }
+
+  // 音节朗读被阻止时给出明确反馈，而不是静默失败
+  function showSyllableBlocked() {
+    var note = $('#wbFinalNote');
+    if (note) {
+      var old = note.textContent;
+      note.textContent = '⚠️ 当前没有韩语音色，整音节（如 ' + $('#wbChar').textContent +
+        '）无法准确朗读。请安装韩语语音包，或在「发音引擎自检」里切到「强制韩语音色」试试在线音色。';
+      clearTimeout(showSyllableBlocked._t);
+      showSyllableBlocked._t = setTimeout(function () { note.textContent = old; }, 4200);
+    }
+    TTS.refresh(true);
+    var banner = $('#ttsBanner');
+    if (banner && banner.classList.contains('show')) {
+      banner.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  // 根据当前模式同步「依赖整音节朗读」的按钮状态
+  function syncAudioUI() {
+    var ok = canSpeakSyllable();
+    var wbPlay = $('#wbPlay');
+    if (wbPlay) {
+      wbPlay.disabled = !ok;
+      wbPlay.title = ok ? '播放当前音节' : '当前无韩语音色，整音节朗读不可靠';
+    }
+    var prReplay = $('#prReplay');
+    if (prReplay && !ok) prReplay.title = '当前无韩语音色，整音节朗读不可靠';
+    else if (prReplay) prReplay.title = '再听一次';
+  }
+
+  /* ==========================================================================
+     12. 事件绑定
+     ========================================================================== */
+  function bindEvents() {
+    // 主题
+    $('#themeBtn').addEventListener('click', function () {
+      applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    });
+
+    /* ---------- 发音设置 / 自检 ---------- */
+    // 横幅按钮
+    var banner = $('#ttsBanner');
+    if (banner) {
+      banner.addEventListener('click', function (e) {
+        var act = e.target.dataset && e.target.dataset.act;
+        if (act === 'rescan') {
+          TTS.refresh();
+          TTS.speak('가', { rate: 0.85 });
+        } else if (act === 'settings') {
+          var panel = $('#ttsSettings');
+          if (panel) panel.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      });
+    }
+
+    // 手动指定语音
+    var voiceSel = $('#voiceSelect');
+    if (voiceSel) {
+      voiceSel.addEventListener('change', function () {
+        TTS.chosenURI = voiceSel.value;
+        TTS.lastError = '';
+        Store.data.voiceURI = voiceSel.value;
+        Store.save();
+        TTS.refresh();
+      });
+    }
+
+    // 发音模式
+    var modeGroup = $('#ttsModeGroup');
+    if (modeGroup) {
+      modeGroup.addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-mode]');
+        if (!btn) return;
+        TTS.mode = btn.dataset.mode;
+        Store.data.ttsMode = TTS.mode;
+        Store.save();
+        TTS.refresh();
+        // 立即用新模式试一下，方便判断是否生效
+        TTS.speak(compose(0, 0, 0), { zhText: '嘎', rate: 0.85 });
+      });
+    }
+
+    // 重新检测
+    var rescan = $('#ttsRescan');
+    if (rescan) {
+      rescan.addEventListener('click', function () {
+        TTS.scanTries = 0;
+        TTS.refresh();
+        TTS.speak(compose(0, 0, 0), { zhText: '嘎', rate: 0.85 });
+      });
+    }
+
+    // 测试朗读
+    var testBtn = $('#ttsTest');
+    if (testBtn) {
+      testBtn.addEventListener('click', function () {
+        if (!TTS.supported) return;
+        if (canSpeakSyllable()) {
+          TTS.speak('가 나 다', { rate: 0.8 });
+        } else if (TTS.activeMode() === 'zh') {
+          TTS.speak('嘎 拿 搭', { zhText: '嘎 拿 搭', rate: 0.8 });
+        } else {
+          showSyllableBlocked();
+        }
+      });
+    }
+
+    // 字母方块（元音 + 辅音）
+    document.addEventListener('click', function (e) {
+      var tile = e.target.closest('.tile');
+      if (tile) playLetter(tile.dataset.ch);
+    });
+
+    // 本课重点 chips
+    $('#focusChips').addEventListener('click', function (e) {
+      var chip = e.target.closest('.fchip');
+      if (chip) playLetter(chip.dataset.ch);
+    });
+
+    // 工作台：辅音 / 元音
+    $('#wbConsonants').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      WB.iniIdx = Number(chip.dataset.idx);
+      WB.render();
+      playLetter(chip.dataset.ch);
+    });
+    $('#wbVowels').addEventListener('click', function (e) {
+      var chip = e.target.closest('.chip');
+      if (!chip) return;
+      WB.vowIdx = Number(chip.dataset.idx);
+      WB.render();
+      playLetter(chip.dataset.ch);
+    });
+    $('#wbFinal').addEventListener('change', function (e) {
+      WB.finIdx = Number(e.target.value);
+      WB.render();
+    });
+
+    // 工作台：播放 / 保存
+    $('#wbPlay').addEventListener('click', function () {
+      var ch = $('#wbChar').textContent;
+      if (!canSpeakSyllable()) { showSyllableBlocked(); return; }
+      TTS.speak(ch, { rate: 0.85 });
+      Store.addReviewSyllable(ch);
+      Store.learn(CONS_MAP.get(WB.iniCh).ch);
+      Store.learn(VOWELS[WB.vowIdx].ch);
+    });
+    $('#wbSave').addEventListener('click', function () {
+      var ch = $('#wbChar').textContent;
+      Store.addReviewSyllable(ch);
+      Store.learn(CONS_MAP.get(WB.iniCh).ch);
+      Store.learn(VOWELS[WB.vowIdx].ch);
+      var btn = this;
+      var old = btn.textContent;
+      btn.textContent = '✓ 已加入复习';
+      btn.disabled = true;
+      clearTimeout(WB.saveTimer);
+      WB.saveTimer = setTimeout(function () {
+        btn.textContent = old;
+        btn.disabled = false;
+      }, 1200);
+    });
+
+    // 练习
+    $('#prStart').addEventListener('click', function () { Practice.next(); });
+    $('#prNext').addEventListener('click', function () { Practice.next(); });
+    $('#prReplay').addEventListener('click', function () {
+      if (!Practice.q) return;
+      if (!canSpeakSyllable()) { showSyllableBlocked(); return; }
+      TTS.speak(Practice.q.ch, { rate: 0.8 });
+    });
+    $('#prReset').addEventListener('click', function () {
+      if (!window.confirm('确定要重置练习统计吗？复习记录不会被删除。')) return;
+      Store.data.stats = { correct: 0, total: 0 };
+      Store.save();
+      Practice.renderStats();
+    });
+
+    // 复习面板：播放 / 删除 / 清空
+    $('#review').addEventListener('click', function (e) {
+      var play = e.target.closest('.rev-play');
+      if (play) {
+        if (play.dataset.kind === 'letter') {
+          speakLetter(play.dataset.ch);
+          flashTile(play.dataset.ch);
+        } else {
+          if (!canSpeakSyllable()) { showSyllableBlocked(); return; }
+          TTS.speak(play.dataset.ch, { rate: 0.85 });
+        }
+        return;
+      }
+      var del = e.target.closest('.rev-del');
+      if (del) {
+        var arr = del.dataset.kind === 'letter' ? Store.data.reviewLetters : Store.data.reviewSyllables;
+        var i = arr.indexOf(del.dataset.ch);
+        if (i !== -1) {
+          arr.splice(i, 1);
+          Store.save();
+          Review.render();
+        }
+      }
+    });
+    $('#revClear').addEventListener('click', function () {
+      if (!Store.data.reviewLetters.length && !Store.data.reviewSyllables.length) return;
+      if (!window.confirm('确定要清空所有复习记录吗？学习进度和练习统计会保留。')) return;
+      Store.data.reviewLetters = [];
+      Store.data.reviewSyllables = [];
+      Store.save();
+      Review.render();
+    });
+
+    // 键盘快捷键（두벌식 布局）
+    document.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' ||
+          t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (e.repeat) return;
+
+      var code = e.code;
+      var ch = null;
+      if (e.shiftKey) {
+        ch = CONS_KEYS_SHIFT[code] || VOWEL_KEYS_SHIFT[code] || null;
+      } else {
+        ch = CONS_KEYS[code] || VOWEL_KEYS[code] || null;
+      }
+      if (ch) {
+        e.preventDefault();
+        playLetter(ch);
+      }
+    });
+  }
+
+  /* ==========================================================================
+     13. 初始化
+     ========================================================================== */
+  function init() {
+    Store.load();
+
+    // 主题：优先已保存，其次系统偏好
+    var theme = Store.data.theme;
+    if (theme !== 'dark' && theme !== 'light') {
+      theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+    applyTheme(theme);
+
+    renderLetterSections();
+    renderTables();
+    Progress.initFocus();
+    Review.render();
+    WB.init();
+    Practice.init();
+    Progress.render();
+    bindEvents();
+    TTS.init();
+    syncAudioUI();
+
+    // 复习面板底部提示（动态插入，避免 HTML 里重复）
+    var tip = document.createElement('p');
+    tip.id = 'storageTip';
+    tip.className = 'rev-tip';
+    tip.style.margin = '8px 0 0';
+    var actions = document.querySelector('.rev-actions');
+    if (actions) actions.appendChild(tip);
+    Review.updateTitles();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
