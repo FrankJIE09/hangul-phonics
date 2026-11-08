@@ -582,7 +582,7 @@ footer p { margin: 4px 0; }
     <div class="panel">
       <div id="vowelGroups"></div>
       <p class="note-inline">
-        <b>试听方式：</b>元音会用「ㅇ＋该元音」合成朗读（如 ㅏ → <b>아</b>），这样发音更完整。
+        <b>试听方式：</b>直接朗读该元音字母本身（如 ㅏ），与桌面跟读卡一致；拼读请到工作台组合完整音节。
         复合元音没有单键快捷键，请直接点击方块；右上角显示的是韩文输入法（두벌식）键序，例如 ㅘ = h + k。
       </p>
     </div>
@@ -597,8 +597,8 @@ footer p { margin: 4px 0; }
     <div class="panel">
       <div id="consonantGroups"></div>
       <p class="note-inline">
-        <b>试听方式：</b>辅音会用「辅音＋ㅏ」合成朗读（如 ㄱ → <b>가</b>），便于听清辅音本音；
-        ㅇ 作初声不发音，试听为「아」。单独的字母名（기역、니은…）与拼读发音不同，本页统一练「本音」。
+        <b>试听方式：</b>直接朗读该辅音字母本身（如 ㄱ / ㄷ / ㅂ），与桌面跟读卡一致。
+        以前合成「가 / 다 / 바」在无韩语音色时会被系统塌成同一个音，现已改掉。完整音节请到工作台拼读。
       </p>
     </div>
   </section>
@@ -762,7 +762,7 @@ footer p { margin: 4px 0; }
         <li><b>三种发音模式。</b>「自动（韩语原音）」与「韩语原音」都是韩文原字朗读；「中文近似音」改用中文音色念近似汉字（ㄱ→嘎、ㄷ→搭、ㅂ→巴），彼此可区分，但整音节（如 넉）无法准确朗读，听力题会自动关闭。<b>如果听着不对，用自检面板里的「A/B 对比」按钮当场判断</b>，再一键切换。</li>
         <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 한국어 → 下载「Yuna」（macOS 通常已内置，Safari 与 Chrome 都能直接用）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
         <li><b>macOS 使用说明。</b>本页是纯前端单文件，Safari / Chrome / Edge 都能用。<b>Safari 的额外限制</b>：朗读必须由真实点击或按键触发（已自动处理，含首次手势解锁），所以不要期待「打开页面就自动读」；另外 Safari 对 <code>file://</code> 的 localStorage 支持不稳定，建议用下面的线上地址或 <code>python3 -m http.server</code> 打开，避免学习记录存不下来。</li>
-        <li><b>单字母是「合成音」。</b>元音用「ㅇ＋元音」、辅音用「辅音＋ㅏ」朗读，目的是听清本音；正式拼读时请以工作台拼出的完整音节为准。</li>
+        <li><b>单字母直接念字母本身。</b>与桌面跟读卡相同：点 ㄱ 就念「ㄱ」，点 ㅏ 就念「ㅏ」，不再预先合成 가 / 아。完整音节请到拼读工作台组合后播放。</li>
         <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
         <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
         <li><b>紧音 ㄲ ㄸ ㅃ ㅆ ㅉ</b> 是「喉部绷紧、不送气」，不是送气音。TTS 可能读成松音或送气音，听的时候注意短促、有力。</li>
@@ -1233,114 +1233,87 @@ footer p { margin: 4px 0; }
       if (typeof syncAudioUI === 'function') syncAudioUI();
     },
 
-    /* 朗读入口
-       koText：韩文原字（默认路径，与旧版单文件一致：lang=ko-KR，交给引擎自己选音色）
-       zhText：中文近似音（仅在中文近似音模式或 opts.forceZh 时使用）
-       opts.rate  语速
-       opts.forceZh 强制用中文近似音（A/B 对比测试用） */
+    /* 朗读入口 —— 韩语原音路径刻意做成与桌面可用版 korean-phonics.html 的 say() 一致：
+         speechSynthesis.cancel();
+         u.lang = 'ko-KR'; u.rate = 0.8;
+         if (koVoice) u.voice = koVoice;   // 没有就留空，绝不塞中文音色
+         speechSynthesis.speak(u);
+       之前多出来的 setTimeout / 看门狗 / 合成音节，在无韩语音色的机器上会把
+       가·다·바 塌成同一个音；桌面版直接念 ㄱ·ㄷ·ㅂ 就不会。 */
     speak: function (koText, opts) {
       opts = opts || {};
       if (!this.supported) return false;
       var mode = opts.forceZh ? 'zh' : this.activeMode();
-      if (mode === 'none') {
-        this.lastError = '没有可用音色';
-        if (typeof this.banner === 'function') {
-          this.banner('浏览器里没有任何可用语音，无法朗读。请先安装语音包后点「重新检测」。', true);
-        }
-        return false;
-      }
-      var text = (mode === 'zh' && opts.zhText) ? opts.zhText : koText;
-      if (!text) return false;
-
-      var lang, voice;
-      if (mode === 'zh') {
-        // 中文近似音必须有中文音色；没有就退回韩语原音
-        if (!this.zhVoice) { mode = 'ko'; } else {
-          voice = this.zhVoice;
-          lang = this.zhVoice.lang || 'zh-CN';
-        }
-      }
-      if (mode === 'ko') {
-        // ★ 与桌面可用版 korean-phonics.html 完全一致：
-        //   只设 lang='ko-KR'；有明确韩语音色才赋值 voice，否则留空让系统路由。
-        //   绝不能把中文音色塞进去 —— 那会把 가/다/바 读成同一个音。
-        voice = this.koVoice || null;
-        lang = 'ko-KR';
-      }
-      // 中文近似音放慢一点，单个汉字的声母（g/d/b…）才听得清
-      var rate = opts.rate || (mode === 'zh' ? 0.68 : 0.85);
-
       var self = this;
-      var token = ++this.token;
-      var started = false;   // 本次是否真的开始发声（给看门狗用）
 
-      var run = function () {
-        if (self.token !== token) return; // 已被新的朗读请求取代
-        try {
-          var u = new SpeechSynthesisUtterance(text);
-          u.lang = lang;
-          // 韩语原音：只在真正有 ko 音色时才指定；否则保持 voice 为空（与旧版一致）
-          // 中文近似音：必须指定 zh 音色
-          if (mode === 'zh') {
-            try { if (voice) u.voice = voice; } catch (e) { u.lang = lang; }
-          } else if (voice && /^ko/i.test(voice.lang || '')) {
-            try { u.voice = voice; } catch (e) { u.lang = 'ko-KR'; }
+      // ---------- 中文近似音（仅手动切换时） ----------
+      if (mode === 'zh') {
+        if (!this.zhVoice) {
+          // 没有中文音色就退回韩语原音
+          mode = 'ko';
+        } else {
+          var zhText = opts.zhText || koText;
+          if (!zhText) return false;
+          try { speechSynthesis.cancel(); } catch (e) {}
+          if (this.timer) clearTimeout(this.timer);
+          if (this.watch) clearTimeout(this.watch);
+          try {
+            var zu = new SpeechSynthesisUtterance(zhText);
+            zu.lang = this.zhVoice.lang || 'zh-CN';
+            try { zu.voice = this.zhVoice; } catch (e2) {}
+            zu.rate = opts.rate || 0.68;
+            zu.pitch = 1; zu.volume = 1;
+            this.lastText = zhText;
+            this.lastError = '';
+            var saidZ = $('#ttsSaid');
+            if (saidZ) {
+              saidZ.textContent = '🔊 ' + zhText;
+              saidZ.hidden = false;
+              saidZ.title = '中文近似音：' + zhText;
+            }
+            speechSynthesis.speak(zu);
+          } catch (err) {
+            this.lastError = String(err && err.message || err);
           }
-          u.rate = rate;
-          u.pitch = 1;
-          u.volume = 1;
-          u.onstart = function () {
-            started = true;
-            self.lastState = '朗读中';
-            self.lastError = '';
-          };
-          u.onerror = function (e) {
-            var code = (e && e.error) || 'unknown';
-            // interrupted / canceled 是我们主动打断上一句时产生的，属正常情况
-            if (code !== 'interrupted' && code !== 'canceled') self.lastError = code;
-            self.panel();
-          };
-          u.onend = function () { self.lastState = '结束'; };
-          self.lastText = text;
-          var said = $('#ttsSaid');
-          if (said) {
-            said.textContent = '🔊 ' + text;
-            said.hidden = false;
-            said.title = '实际送给语音引擎的内容：' + text +
-              '（' + (voice ? voice.name : lang) + '）';
-          }
-          speechSynthesis.speak(u);
-        } catch (err) {
-          self.lastError = String(err && err.message || err);
+          this.panel();
+          return true;
         }
-        self.panel();
-      };
-
-      // 打断上一句再立刻重播：
-      //   Chromium 里 cancel() 后同一 tick 调 speak() 会被吞掉，必须隔一个 tick；
-      //   Safari / iOS 里 setTimeout 会脱离「用户手势」上下文，speak() 被拒（not-allowed），
-      //   所以 Safari 必须同步调用。这里按引擎分流。
-      if (speechSynthesis.speaking || speechSynthesis.pending) {
-        try { speechSynthesis.cancel(); } catch (e) {}
-        if (this.timer) clearTimeout(this.timer);
-        if (IS_WEBKIT) run();
-        else this.timer = setTimeout(run, 70);
-      } else {
-        try { speechSynthesis.resume(); } catch (e) {}
-        run();
       }
 
-      // 看门狗：极少数情况（Safari 在 cancel 后同步 speak 被静默丢弃）声音根本没开始。
-      // 若 320ms 内既没有 onstart、speaking 也是 false，就重试一次，避免「点了没声音」。
+      // ---------- 韩语原音（默认，与桌面版 say() 逐行对齐） ----------
+      if (!koText) return false;
+      try { speechSynthesis.cancel(); } catch (e) {}
+      if (this.timer) clearTimeout(this.timer);
       if (this.watch) clearTimeout(this.watch);
-      this.watch = setTimeout(function () {
-        if (self.token !== token) return;
-        if (started || self.retried === token) return;
-        if (speechSynthesis.speaking || speechSynthesis.pending) return;
-        self.retried = token;
-        try { speechSynthesis.cancel(); } catch (e) {}
-        run();
-      }, 320);
+      this.token++; // 作废任何排队中的旧请求
+      try {
+        var u = new SpeechSynthesisUtterance(koText);
+        u.lang = 'ko-KR';
+        u.rate = opts.rate || 0.8;
+        // 只有真正枚举到韩语音色才赋值；否则 voice 留空，让系统按 lang 路由
+        if (this.koVoice) {
+          try { u.voice = this.koVoice; } catch (e3) {}
+        }
+        u.pitch = 1;
+        u.volume = 1;
+        u.onerror = function (e) {
+          var code = (e && e.error) || 'unknown';
+          if (code !== 'interrupted' && code !== 'canceled') self.lastError = code;
+          self.panel();
+        };
+        this.lastText = koText;
+        this.lastError = '';
+        var said = $('#ttsSaid');
+        if (said) {
+          said.textContent = '🔊 ' + koText;
+          said.hidden = false;
+          said.title = '韩语原音：' + koText +
+            '（' + (this.koVoice ? this.koVoice.name : 'ko-KR 系统路由') + '）';
+        }
+        speechSynthesis.speak(u);
+      } catch (err2) {
+        this.lastError = String(err2 && err2.message || err2);
+      }
       this.panel();
       return true;
     }
@@ -1404,17 +1377,16 @@ footer p { margin: 4px 0; }
     return TTS.speak(demo, { zhText: zhApprox });
   }
 
-  // 把「单个字母」转成适合朗读的发音；zh 字段用于无韩语音色时的近似朗读
+  /* 单个字母试听 —— 与桌面可用版完全一致：直接念字母本身（ㄱ / ㅏ），
+     不再合成 가 / 아。无韩语音色时，合成音节会被系统塌成同一个音；
+     直接念字母则与 korean-phonics.html 听感一致。
+     zhText 仅在用户手动切到「中文近似音」时使用。 */
   function speakLetter(ch, opts) {
     opts = opts || {};
     var v = VOWEL_MAP.get(ch);
-    if (v) {
-      return TTS.speak(compose(11, v.idx, 0), { zhText: v.zh, rate: opts.rate }); // ㅇ + 元音
-    }
+    if (v) return TTS.speak(ch, { zhText: v.zh, rate: opts.rate });
     var c = CONS_MAP.get(ch);
-    if (c) {
-      return TTS.speak(compose(c.idx, 0, 0), { zhText: c.zh, rate: opts.rate });   // 辅音 + ㅏ
-    }
+    if (c) return TTS.speak(ch, { zhText: c.zh, rate: opts.rate });
     return TTS.speak(ch, { zhText: ch, rate: opts.rate });
   }
 
@@ -2132,7 +2104,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-08.7';
+  var BUILD = '2026-11-08.8';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
