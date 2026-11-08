@@ -748,24 +748,25 @@ footer p { margin: 4px 0; }
         <div class="tts-controls">
           <span style="font-size:12px;color:var(--muted)">发音模式</span>
           <div class="tts-mode-group" id="ttsModeGroup" role="group" aria-label="发音模式">
-            <button type="button" data-mode="auto" aria-pressed="true">自动</button>
-            <button type="button" data-mode="ko" aria-pressed="false">强制韩语音色</button>
+            <button type="button" data-mode="auto" aria-pressed="true">自动（韩语原音）</button>
+            <button type="button" data-mode="ko" aria-pressed="false">韩语原音</button>
             <button type="button" data-mode="zh" aria-pressed="false">中文近似音</button>
           </div>
           <button class="btn ghost" id="ttsTest" type="button">▶ 测试「가 나 다」</button>
+          <button class="btn ghost" id="ttsAB" type="button">▶ A/B 对比「가 / 嘎」</button>
         </div>
       </div>
 
       <ul>
-        <li><b>以浏览器 TTS 为准，但必须确认用的是韩语音色。</b>本页全部使用 Web Speech API。若系统没有韩语音色，浏览器会<b>静默改用默认音色</b>（中文/英文）去念韩文，听起来就像「点了这个字却发出别的音」。页面顶部出现红色提示时，请到「⑦ 发音注意事项 → 发音引擎自检」查看可用语音，并按指引安装韩语语音包。</li>
-        <li><b>三种发音模式。</b>「自动」优先韩语音色、缺失时退回中文近似音；「强制韩语音色」在有韩语音色时始终用它，<b>若系统里根本没有韩语音色则自动回退近似音并提示</b>（否则会把不同字母读成同一个音）；「中文近似音」用中文音色念每个字母的中文近似字（仅字母可用，整音节不可用）。</li>
+        <li><b>发音方式以「韩语原音」为默认。</b>本页把<b>韩文原字</b>交给浏览器，并把 <code>lang</code> 设为 <code>ko-KR</code>，由引擎自己路由音色。即使系统语音列表里没有列出 <code>ko-KR</code>，大多数浏览器/系统仍能正确朗读韩文（Edge 的在线神经音色、Windows OneCore 音色、Safari 的 Yuna 常常不出现在列表里）。</li>
+        <li><b>三种发音模式。</b>「自动（韩语原音）」与「韩语原音」都是韩文原字朗读；「中文近似音」改用中文音色念近似汉字（ㄱ→嘎、ㄷ→搭、ㅂ→巴），彼此可区分，但整音节（如 넉）无法准确朗读，听力题会自动关闭。<b>如果听着不对，用自检面板里的「A/B 对比」按钮当场判断</b>，再一键切换。</li>
         <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 한국어 → 下载「Yuna」（macOS 通常已内置，Safari 与 Chrome 都能直接用）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
         <li><b>macOS 使用说明。</b>本页是纯前端单文件，Safari / Chrome / Edge 都能用。<b>Safari 的额外限制</b>：朗读必须由真实点击或按键触发（已自动处理，含首次手势解锁），所以不要期待「打开页面就自动读」；另外 Safari 对 <code>file://</code> 的 localStorage 支持不稳定，建议用下面的线上地址或 <code>python3 -m http.server</code> 打开，避免学习记录存不下来。</li>
         <li><b>单字母是「合成音」。</b>元音用「ㅇ＋元音」、辅音用「辅音＋ㅏ」朗读，目的是听清本音；正式拼读时请以工作台拼出的完整音节为准。</li>
         <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
         <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
         <li><b>紧音 ㄲ ㄸ ㅃ ㅆ ㅉ</b> 是「喉部绷紧、不送气」，不是送气音。TTS 可能读成松音或送气音，听的时候注意短促、有力。</li>
-        <li><b>没有韩语音色时，近似字一定会区分开。</b>松音用一声、平缓（ㄱ→嘎、ㄷ→搭、ㅂ→巴），紧音用四声、短促（ㄲ→尬、ㄸ→大、ㅃ→爸），保证不同字母不会播成同一个音。顶栏「🔊」标签会显示<b>实际送进语音引擎的字</b>，可用来核对。</li>
+        <li><b>中文近似音模式下，近似字一定两两不同。</b>松音一声平缓（ㄱ→嘎、ㄷ→搭、ㅂ→巴），紧音四声短促（ㄲ→尬、ㄸ→大、ㅃ→爸）。顶栏「🔊」标签会显示<b>实际送进语音引擎的内容</b>（韩文原字或近似汉字），可用来核对是哪种模式在发声。</li>
         <li><b>看到页脚构建版本号对不上，就是缓存。</b>如果修完仍听到旧行为，按 Ctrl/⌘ + Shift + R 强制刷新（GitHub Pages 有 CDN 缓存）。</li>
         <li><b>받침 ㄱ ㄷ ㅂ</b> 读不爆破的 [k̚ t̚ p̚]：只做口型、不放出气流，不要额外加「으」。</li>
         <li><b>ㅢ · ㅚ · ㅟ</b> 有多个变体读音（如 ㅢ 在助词中常读 /e/），TTS 选择哪一种因语音包而异。</li>
@@ -1121,41 +1122,37 @@ footer p { margin: 4px 0; }
     },
 
     /* 当前真正生效的模式
-       ★ 关键约束：绝不能在没有韩语音色时把「韩文」交给非韩语音色。
-         中文 / 英文音色读到「가 다 바」这类谚文时，往往退化成同一个音，
-         听感就是「点哪个字母都一样」——这是最难察觉的静默错误。
-         所以这里宁可回退到 zh 近似音，也不返回 'ko'。 */
+       ★ 这里以「实测听感」为准，而不是以 getVoices() 是否枚举到韩语音色为准：
+         很多环境（Edge 的在线神经音色、Windows OneCore 音色、Safari）在
+         getVoices() 里看不到 ko-KR，但把韩文原字交给引擎并按 lang='ko-KR' 朗读
+         是正确的 —— 旧版单文件正是这么做的，听感也对。
+         所以默认一律走「韩语原音」，中文近似音只作为用户主动选择的兜底。 */
     activeMode: function () {
-      if (this.mode !== 'zh' && this.koVoice) return 'ko';
-      if (this.zhVoice) return 'zh';
-      return 'none';
+      if (this.mode === 'zh') return this.zhVoice ? 'zh' : 'ko';
+      return 'ko'; // auto / ko 都是韩语原音
     },
 
     updateStatus: function (silent) {
       if (!this.supported) return;
       var m = this.activeMode();
-      if (m === 'ko') {
+      if (m === 'ko' && this.koVoice) {
         setTtsStatus('韩语音色 · ' + this.koVoice.name, 'ok');
         this.banner('', false);
+      } else if (m === 'ko') {
+        setTtsStatus('韩语原音 · 未列出韩语音色', 'warn');
+        this.banner(
+          '系统语音列表里没有 <code>ko-KR</code> 音色，但本页仍按<b>韩语原音</b>朗读（把韩文原字交给引擎，' +
+          'lang 设为 ko-KR）——多数情况下这样是对的，和旧版单文件行为一致。' +
+          '若你听着觉得不对（比如几个字母同一个音），点下面的按钮改成<b>中文近似音</b>。',
+          false
+        );
       } else if (m === 'zh') {
-        if (this.mode === 'ko') {
-          // 用户强制要求韩语音色，但系统里没有 → 必须回退，否则会读成同一个音
-          setTtsStatus('无韩语音色 · 已回退近似音', 'warn');
-          this.banner(
-            '你选了「强制韩语音色」，但系统里<b>没有</b>任何韩语音色。' +
-            '若强行把韩文交给中文音色朗读，不同字母会退化成同一个音，' +
-            '所以这里已自动回退到<b>中文近似音</b>，每个字母用独立的近似字朗读。',
-            true
-          );
-        } else {
-          setTtsStatus('中文近似音（无韩语音色）', 'warn');
-          this.banner(
-            '未检测到韩语音色，已启用<b>中文近似音</b>：每个字母用<b>不同的近似字</b>朗读' +
-            '（ㄱ→嘎、ㄷ→搭、ㅂ→巴），保证彼此可区分；但整音节（如 넉、즤）无法准确朗读，' +
-            '练习模式会自动只出「看字选组合」题。',
-            false
-          );
-        }
+        setTtsStatus('中文近似音', 'warn');
+        this.banner(
+          '当前使用<b>中文近似音</b>：每个字母用不同的近似字朗读（ㄱ→嘎、ㄷ→搭、ㅂ→巴），' +
+          '彼此可区分，但整音节（如 넉、즤）无法准确朗读，练习模式会自动只出「看字选组合」题。',
+          false
+        );
       } else {
         setTtsStatus('无可用语音', 'warn');
         this.banner(
@@ -1174,9 +1171,12 @@ footer p { margin: 4px 0; }
         return;
       }
       el.className = 'tts-banner show' + (isError ? '' : ' ok');
+      var extra = this.mode === 'zh'
+        ? '<button class="btn" type="button" data-act="useko">改用韩语原音</button>'
+        : '<button class="btn" type="button" data-act="usezh">改用中文近似音</button>';
       el.innerHTML = (isError ? '⚠️ ' : 'ℹ️ ') + html +
-        '<div class="bn-actions">' +
-        '<button class="btn" type="button" data-act="rescan">重新检测语音</button>' +
+        '<div class="bn-actions">' + extra +
+        '<button class="btn ghost" type="button" data-act="rescan">重新检测语音</button>' +
         '<button class="btn ghost" type="button" data-act="settings">发音设置 / 安装指引</button>' +
         '</div>';
     },
@@ -1190,7 +1190,7 @@ footer p { margin: 4px 0; }
       $('#diagCount').textContent = this.voices.length + ' 个' +
         (this.voices.length ? '（' + Array.from(new Set(this.voices.map(function (v) { return v.lang; }))).join(', ') + '）' : '');
       $('#diagVoice').textContent = m === 'ko'
-        ? this.koVoice.name + ' [ko]'
+        ? (this.koVoice ? this.koVoice.name + ' [ko]' : '未列出 · 按 ko-KR 系统路由')
         : (m === 'zh'
             ? (this.zhVoice ? this.zhVoice.name + ' [zh 近似]' : '无')
             : '无可用语音');
@@ -1206,8 +1206,9 @@ footer p { margin: 4px 0; }
 
       var pill = $('#ttsPill');
       if (!this.supported) { pill.className = 'pill bad'; pill.textContent = '不可用'; }
-      else if (m === 'ko') { pill.className = 'pill good'; pill.textContent = '韩语音色就绪'; }
-      else if (m === 'zh') { pill.className = 'pill bad'; pill.textContent = '无韩语音色 · 近似音'; }
+      else if (m === 'ko' && this.koVoice) { pill.className = 'pill good'; pill.textContent = '韩语音色就绪'; }
+      else if (m === 'ko') { pill.className = 'pill good'; pill.textContent = '韩语原音 · 系统路由'; }
+      else if (m === 'zh') { pill.className = 'pill bad'; pill.textContent = '中文近似音'; }
       else { pill.className = 'pill bad'; pill.textContent = '无可用语音'; }
 
       // 语音下拉
@@ -1233,13 +1234,14 @@ footer p { margin: 4px 0; }
     },
 
     /* 朗读入口
-       koText：韩文（正常路径）
-       zhText：无韩语音色时的中文近似（可选）
-       opts.rate 语速 */
+       koText：韩文原字（默认路径，与旧版单文件一致：lang=ko-KR，交给引擎自己选音色）
+       zhText：中文近似音（仅在中文近似音模式或 opts.forceZh 时使用）
+       opts.rate  语速
+       opts.forceZh 强制用中文近似音（A/B 对比测试用） */
     speak: function (koText, opts) {
       opts = opts || {};
       if (!this.supported) return false;
-      var mode = this.activeMode();
+      var mode = opts.forceZh ? 'zh' : this.activeMode();
       if (mode === 'none') {
         this.lastError = '没有可用音色';
         if (typeof this.banner === 'function') {
@@ -1252,13 +1254,20 @@ footer p { margin: 4px 0; }
 
       var lang, voice;
       if (mode === 'zh') {
-        voice = this.zhVoice;
-        lang = (voice && voice.lang) || 'zh-CN';
-      } else {
-        voice = this.koVoice;
-        lang = (voice && voice.lang) || 'ko-KR';
+        // 中文近似音必须有中文音色；没有就退回韩语原音
+        if (!this.zhVoice) { mode = 'ko'; } else {
+          voice = this.zhVoice;
+          lang = this.zhVoice.lang || 'zh-CN';
+        }
       }
-      // 中文近似音放慢一点，单个汉字的声母（g/d/b…）才听得清，也避免被吞成同一个音
+      if (mode === 'ko') {
+        // ★ 与桌面可用版 korean-phonics.html 完全一致：
+        //   只设 lang='ko-KR'；有明确韩语音色才赋值 voice，否则留空让系统路由。
+        //   绝不能把中文音色塞进去 —— 那会把 가/다/바 读成同一个音。
+        voice = this.koVoice || null;
+        lang = 'ko-KR';
+      }
+      // 中文近似音放慢一点，单个汉字的声母（g/d/b…）才听得清
       var rate = opts.rate || (mode === 'zh' ? 0.68 : 0.85);
 
       var self = this;
@@ -1270,8 +1279,13 @@ footer p { margin: 4px 0; }
         try {
           var u = new SpeechSynthesisUtterance(text);
           u.lang = lang;
-          // 个别浏览器的 voice 对象不可赋值，赋值失败就退回只用 lang
-          try { if (voice) u.voice = voice; } catch (e) { u.lang = lang; }
+          // 韩语原音：只在真正有 ko 音色时才指定；否则保持 voice 为空（与旧版一致）
+          // 中文近似音：必须指定 zh 音色
+          if (mode === 'zh') {
+            try { if (voice) u.voice = voice; } catch (e) { u.lang = lang; }
+          } else if (voice && /^ko/i.test(voice.lang || '')) {
+            try { u.voice = voice; } catch (e) { u.lang = 'ko-KR'; }
+          }
           u.rate = rate;
           u.pitch = 1;
           u.volume = 1;
@@ -1338,6 +1352,14 @@ footer p { margin: 4px 0; }
     el.textContent = text;
     el.className = 'tts-status' + (kind ? ' ' + kind : '');
     el.title = detail || text;
+  }
+
+  /* 切换发音模式（并持久化），三个入口共用：横幅按钮、模式按钮组、A/B 测试 */
+  function setTtsMode(mode) {
+    TTS.mode = mode;
+    Store.data.ttsMode = mode;
+    Store.save();
+    TTS.refresh();
   }
 
   /* 收音按「代表音」给出准确的口型提示（7 种代表音）
@@ -1672,7 +1694,8 @@ footer p { margin: 4px 0; }
 
       // 两种题型交替出现，保证「看字选组合」和「听音选字母」都能练到
       var type = this.lastType === 'compose' ? 'listen' : 'compose';
-      // 没有韩语音色时，整音节无法准确朗读 → 只出「看字选组合」，避免练出错误记忆
+      // 只有「中文近似音」模式下整音节读不准 → 只出「看字选组合」；
+      // 韩语原音模式（即使系统没枚举到韩语音色）照常出听力题。
       if (type === 'listen' && TTS.activeMode() !== 'ko') type = 'compose';
       this.lastType = type;
       this.q = this.makeQuestion(type);
@@ -1691,7 +1714,7 @@ footer p { margin: 4px 0; }
         ? '选出组成这个字的辅音 + 元音（+ 收音）'
         : '听发音，选出对应的韩字';
       $('#prPrompt').textContent = q.type === 'compose' ? q.ch : '🔊';
-      // 无韩语音色时，整音节朗读不可靠，隐藏「再听一次」
+      // 音节朗读按钮：韩语原音模式下始终可用
       $('#prReplay').hidden = q.type !== 'listen' && TTS.activeMode() !== 'ko';
 
       $('#prOptions').innerHTML = q.options.map(function (val, i) {
@@ -1813,7 +1836,8 @@ footer p { margin: 4px 0; }
 
   // 只有存在韩语音色时，整音节朗读才可靠
   function canSpeakSyllable() {
-    return TTS.activeMode() === 'ko' && !!TTS.koVoice;
+    // 韩语原音模式下即认为可朗读：与旧版单文件一致，不要求 getVoices() 里一定能枚举到 ko-KR
+    return TTS.supported && TTS.activeMode() === 'ko';
   }
 
   // 音节朗读被阻止时给出明确反馈，而不是静默失败
@@ -1821,8 +1845,8 @@ footer p { margin: 4px 0; }
     var note = $('#wbFinalNote');
     if (note) {
       var old = note.textContent;
-      note.textContent = '⚠️ 当前没有韩语音色，整音节（如 ' + $('#wbChar').textContent +
-        '）无法准确朗读。请安装韩语语音包，或在「发音引擎自检」里切到「强制韩语音色」试试在线音色。';
+      note.textContent = '⚠️ 当前处于「中文近似音」模式，整音节（如 ' + $('#wbChar').textContent +
+        '）无法准确朗读。请切到「韩语原音」模式，或安装韩语语音包后点「重新检测」。';
       clearTimeout(showSyllableBlocked._t);
       showSyllableBlocked._t = setTimeout(function () { note.textContent = old; }, 4200);
     }
@@ -1839,7 +1863,7 @@ footer p { margin: 4px 0; }
     var wbPlay = $('#wbPlay');
     if (wbPlay) {
       wbPlay.disabled = !ok;
-      wbPlay.title = ok ? '播放当前音节' : '当前无韩语音色，整音节朗读不可靠';
+      wbPlay.title = ok ? '播放当前音节' : '中文近似音模式下整音节朗读不可靠';
     }
     var prReplay = $('#prReplay');
     if (prReplay && !ok) prReplay.title = '当前无韩语音色，整音节朗读不可靠';
@@ -1863,6 +1887,9 @@ footer p { margin: 4px 0; }
         var act = e.target.dataset && e.target.dataset.act;
         if (act === 'rescan') {
           TTS.refresh();
+          TTS.speak('가', { zhText: '嘎' });
+        } else if (act === 'usezh' || act === 'useko') {
+          setTtsMode(act === 'usezh' ? 'zh' : 'ko');
           TTS.speak('가', { zhText: '嘎' });
         } else if (act === 'settings') {
           var panel = $('#ttsSettings');
@@ -1889,10 +1916,7 @@ footer p { margin: 4px 0; }
       modeGroup.addEventListener('click', function (e) {
         var btn = e.target.closest('button[data-mode]');
         if (!btn) return;
-        TTS.mode = btn.dataset.mode;
-        Store.data.ttsMode = TTS.mode;
-        Store.save();
-        TTS.refresh();
+        setTtsMode(btn.dataset.mode);
         // 立即用新模式试一下，方便判断是否生效
         TTS.speak(compose(0, 0, 0), { zhText: '嘎' });
       });
@@ -1920,6 +1944,19 @@ footer p { margin: 4px 0; }
         } else {
           showSyllableBlocked();
         }
+      });
+    }
+
+    // A/B 对比：用同一个字母分别按「韩语原音」「中文近似音」各读一遍，
+    // 由使用者自己判断哪个对，避免程序猜错。
+    var abBtn = $('#ttsAB');
+    if (abBtn) {
+      abBtn.addEventListener('click', function () {
+        if (!TTS.supported) return;
+        TTS.speak('가', { zhText: '嘎' });
+        setTimeout(function () {
+          TTS.speak('嘎', { zhText: '嘎', forceZh: true });
+        }, 1100);
       });
     }
 
@@ -2095,7 +2132,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-08.6';
+  var BUILD = '2026-11-08.7';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
