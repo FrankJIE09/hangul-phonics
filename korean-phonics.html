@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>韩语基础音素 · 跟读卡</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1c2024; --muted:#6b7280;
+    --line:#e6e8eb; --accent:#2f6fed; --accent-soft:#eaf0ff; --warn:#c2410c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:22px 16px 48px; background:var(--bg); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:840px;margin:0 auto}
+  h1{font-size:19px;margin:0 0 6px}
+  .sub{margin:0 0 4px;color:var(--muted);font-size:13px;line-height:1.7}
+  h2{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em;
+     margin:24px 0 10px;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
+  .card{
+    position:relative;appearance:none;border:1px solid var(--line);background:var(--card);
+    border-radius:12px;padding:12px 6px 9px;cursor:pointer;text-align:center;
+    font:inherit;color:inherit;box-shadow:0 1px 2px rgba(16,24,40,.04);
+    transition:transform .08s,box-shadow .15s,border-color .15s,background .15s;
+  }
+  .card:hover{border-color:#cfd6e4;box-shadow:0 4px 12px rgba(16,24,40,.08)}
+  .card:active{transform:scale(.96)}
+  .card .han{display:block;font-size:27px;line-height:1.15;font-weight:600}
+  .card .ipa{display:block;font-family:ui-monospace,Consolas,monospace;font-size:10.5px;color:var(--muted);margin-top:3px}
+  .card .key{position:absolute;top:5px;right:7px;font-size:9px;color:#9aa3af;
+             font-family:ui-monospace,Consolas,monospace;text-transform:uppercase}
+  .card.no-en::before{content:"";position:absolute;top:8px;left:8px;width:5px;height:5px;
+             border-radius:50%;background:var(--warn)}
+  .card.hit{background:var(--accent-soft);border-color:#bcd0ff}
+  .card.sel{background:var(--accent-soft);border-color:#bcd0ff;box-shadow:0 0 0 2px #dbe6ff inset}
+  .build{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px}
+  .slots{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+  .slot{
+    width:76px;height:76px;border-radius:16px;border:1px dashed #c9d0da;background:#fbfcfe;
+    font-size:30px;font-weight:600;color:#9aa3af;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;transition:.15s;
+  }
+  .slot.filled{border-style:solid;border-color:#cfd8e6;background:#fff;color:var(--ink)}
+  .slot.res{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+  .op{color:#9aa3af;font-size:13px}
+  .out{margin:14px 0 0;text-align:center;font-size:13px;color:var(--muted);min-height:20px}
+  .row{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  .btn{appearance:none;font:inherit;font-size:12px;padding:6px 14px;border-radius:8px;
+       border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer}
+  .btn:hover{border-color:#cfd6e4;color:var(--ink)}
+  .hint{margin-top:22px;font-size:12.5px;line-height:1.9;color:#4b5563;
+        background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .hint b{color:var(--ink)}
+  .dot{color:var(--warn)}
+  kbd{font-family:ui-monospace,Consolas,monospace;font-size:11px;background:#f1f3f6;
+      border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px}
+  @media (max-width:380px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(66px,1fr))}
+    .slot{width:64px;height:64px;font-size:26px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>韩语基础音素 · 跟读卡</h1>
+  <p class="sub">点卡片或按对应键朗读（键位＝韩语键盘布局）· 带 <span class="dot">●</span> 的音英文里没有</p>
+  <p class="sub" id="vmsg"></p>
+
+  <h2>辅音 자음 · 14</h2>
+  <div class="grid" id="cons"></div>
+
+  <h2>元音 모음 · 10</h2>
+  <div class="grid" id="vows"></div>
+
+  <h2>拼读 조합</h2>
+  <div class="build">
+    <div class="slots">
+      <button class="slot" id="slotC" title="点此清除辅音">?</button>
+      <span class="op">+</span>
+      <button class="slot" id="slotV" title="点此清除元音">?</button>
+      <span class="op">=</span>
+      <button class="slot res" id="slotS" title="点击重读音节">?</button>
+    </div>
+    <p class="out" id="out">先点一个辅音，再点一个元音</p>
+    <div class="row">
+      <button class="btn" id="again">再读一次</button>
+      <button class="btn" id="clear">清空</button>
+    </div>
+  </div>
+
+  <div class="hint">
+    <b>发音小提示</b><br>
+    · <b>ㅡ</b> <code>/ɯ/</code>：嘴唇不圆、舌头靠后，介于「呃」和「呜」之间，<b>英文没有对应音</b>。<br>
+    · <b>ㅓ</b> <code>/ʌ/</code>：不圆唇的后元音，别读成英文 <i>o</i>，接近汉语「哦」但更靠后。<br>
+    · <b>ㄹ</b> <code>/ɾ/</code>：舌尖轻弹一下，介于 r 和 l 之间（类似西语 pero 的 r），<b>英文没有对应音</b>。<br>
+    · <b>ㅈ</b> <code>/tɕ/</code>：舌面贴硬腭，介于 j 和 ch 之间；ㅊ /tɕʰ/ 是它的送气版。<br>
+    · <b>ㅇ</b> 在音节开头不发音，只占位；做收音时才读 /ŋ/。<br>
+    · 松音 ㄱ ㄷ ㅂ ㅈ 在词首略带送气，不要读成很重的 g / d / b。<br>
+    · 送气三兄弟：ㅋ /kʰ/、ㅌ /tʰ/、ㅍ /pʰ/，发音时手放嘴前能感到气流。
+  </div>
+</div>
+
+<script>
+/* ---------- 数据：谚文 / 罗马字 / IPA / 键盘键 / 英文无对应音标记 ---------- */
+const CONS = [
+  ['ㄱ','g/k','/k/','r'],  ['ㄴ','n','/n/','s'],   ['ㄷ','d/t','/t/','e'],
+  ['ㄹ','r/l','/ɾ/','f',1],['ㅁ','m','/m/','a'],   ['ㅂ','b/p','/p/','q'],
+  ['ㅅ','s','/s/','t'],    ['ㅇ','–','/∅~ŋ/','d'], ['ㅈ','j','/tɕ/','w',1],
+  ['ㅊ','ch','/tɕʰ/','c'], ['ㅋ','k','/kʰ/','z'],  ['ㅌ','t','/tʰ/','x'],
+  ['ㅍ','p','/pʰ/','v'],   ['ㅎ','h','/h/','g']
+];
+const VOWS = [
+  ['ㅏ','a','/a/','k'],   ['ㅑ','ya','/ja/','i'], ['ㅓ','eo','/ʌ/','j',1],
+  ['ㅕ','yeo','/jʌ/','u'],['ㅗ','o','/o/','h'],   ['ㅛ','yo','/jo/','y'],
+  ['ㅜ','u','/u/','n'],   ['ㅠ','yu','/ju/','b'], ['ㅡ','eu','/ɯ/','m',1],
+  ['ㅣ','i','/i/','l']
+];
+
+/* ---------- 组合方块字：Unicode 韩文音节区 AC00 起 ---------- */
+const CHO  = {ㄱ:0,ㄲ:1,ㄴ:2,ㄷ:3,ㄸ:4,ㄹ:5,ㅁ:6,ㅂ:7,ㅃ:8,ㅅ:9,ㅆ:10,ㅇ:11,ㅈ:12,ㅉ:13,ㅊ:14,ㅋ:15,ㅌ:16,ㅍ:17,ㅎ:18};
+const JUNG = {ㅏ:0,ㅐ:1,ㅑ:2,ㅒ:3,ㅓ:4,ㅔ:5,ㅕ:6,ㅖ:7,ㅗ:8,ㅘ:9,ㅙ:10,ㅚ:11,ㅛ:12,ㅜ:13,ㅝ:14,ㅞ:15,ㅟ:16,ㅠ:17,ㅡ:18,ㅢ:19,ㅣ:20};
+const compose = (c, v) => String.fromCharCode(0xAC00 + (CHO[c] * 21 + JUNG[v]) * 28);
+
+/* ---------- 朗读 ---------- */
+const $ = s => document.querySelector(s);
+let voice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();               // 优先挑韩语语音包
+  voice = vs.find(v => /^ko(-|_)KR/i.test(v.lang)) || vs.find(v => v.lang.startsWith('ko')) || null;
+  $('#vmsg').textContent = voice ? '' : '⚠ 未检测到韩语语音包，声音可能不准：Windows 设置 → 时间和语言 → 语音 → 添加「한국어」。';
+}
+function say(text){
+  if(!('speechSynthesis' in window)){ $('#vmsg').textContent = '⚠ 当前浏览器不支持 Web Speech API。'; return; }
+  speechSynthesis.cancel();                              // 打断上一次，连点不堆积
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR'; u.rate = 0.8;
+  if(voice) u.voice = voice;
+  speechSynthesis.speak(u);
+}
+pickVoice();
+speechSynthesis.onvoiceschanged = pickVoice;             // 语音列表异步加载
+
+/* ---------- 状态 ---------- */
+let curC = 'ㅇ', curV = null;                            // 默认 ㅇ，只点元音也能成字
+const keyMap = {};                                       // 键盘键 -> {type, jamo, el}
+
+/* ---------- 生成卡片 ---------- */
+function card([han, rom, ipa, key, noEn], type){
+  const b = document.createElement('button');
+  b.className = 'card' + (noEn ? ' no-en' : '');
+  b.innerHTML = `<span class="key">${key}</span><span class="han">${han}</span><span class="ipa">${ipa} ${rom}</span>`;
+  b.onclick = () => press(type, han, key);
+  keyMap[key] = { type, jamo: han, el: b };
+  return b;
+}
+CONS.forEach(d => $('#cons').appendChild(card(d, 'c')));
+VOWS.forEach(d => $('#vows').appendChild(card(d, 'v')));
+
+/* ---------- 点击 / 按键 ---------- */
+function press(type, jamo, key){
+  type === 'c' ? (curC = jamo) : (curV = jamo);
+  flash(key);
+  draw();
+  say(curV ? compose(curC, curV) : jamo);                // 有元音就读整个音节，否则读单个字母
+}
+
+let hitTimer;
+function flash(key){
+  const it = keyMap[key]; if(!it) return;
+  it.el.classList.add('hit');
+  clearTimeout(hitTimer);
+  hitTimer = setTimeout(() => it.el.classList.remove('hit'), 180);
+}
+
+function draw(){
+  $('#slotC').textContent = curC;
+  $('#slotC').classList.add('filled');
+  $('#slotV').textContent = curV || '·';
+  $('#slotV').classList.toggle('filled', !!curV);
+  // 标记当前选中的卡片
+  Object.values(keyMap).forEach(o => o.el.classList.remove('sel'));
+  Object.values(keyMap).forEach(o => {
+    if((o.type === 'c' && o.jamo === curC && curV !== null) || (o.type === 'v' && o.jamo === curV)) o.el.classList.add('sel');
+  });
+  if(curV){
+    const s = compose(curC, curV);
+    $('#slotS').textContent = s;
+    $('#out').textContent = `${curC} + ${curV} → ${s}（点方块重读）`;
+  }else{
+    $('#slotS').textContent = '?';
+    $('#out').textContent = '再点一个元音，就能拼出方块字';
+  }
+}
+
+/* ---------- 交互按钮 ---------- */
+$('#slotS').onclick = () => curV && say(compose(curC, curV));
+$('#again').onclick = () => say(curV ? compose(curC, curV) : curC);
+$('#clear').onclick = () => { curC = 'ㅇ'; curV = null; draw(); };
+$('#slotC').onclick = () => { curC = 'ㅇ'; draw(); };
+$('#slotV').onclick = () => { curV = null; draw(); };
+
+/* ---------- 键盘绑定（韩语 두벌식 布局） ---------- */
+addEventListener('keydown', e => {
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase(), it = keyMap[k];
+  if(!it) return;
+  e.preventDefault();
+  press(it.type, it.jamo, k);
+});
+
+draw();
+</script>
+</body>
+</html>
