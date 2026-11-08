@@ -582,7 +582,7 @@ footer p { margin: 4px 0; }
     <div class="panel">
       <div id="vowelGroups"></div>
       <p class="note-inline">
-        <b>试听方式：</b>直接朗读该元音字母本身（如 ㅏ），与桌面跟读卡一致；拼读请到工作台组合完整音节。
+        <b>试听方式：</b>元音用「ㅇ＋该元音」朗读本音（ㅏ → <b>아</b>）。有韩语音色时念韩文；没有则自动用中文近似音。
         复合元音没有单键快捷键，请直接点击方块；右上角显示的是韩文输入法（두벌식）键序，例如 ㅘ = h + k。
       </p>
     </div>
@@ -597,8 +597,8 @@ footer p { margin: 4px 0; }
     <div class="panel">
       <div id="consonantGroups"></div>
       <p class="note-inline">
-        <b>试听方式：</b>直接朗读该辅音字母本身（如 ㄱ / ㄷ / ㅂ），与桌面跟读卡一致。
-        以前合成「가 / 다 / 바」在无韩语音色时会被系统塌成同一个音，现已改掉。完整音节请到工作台拼读。
+        <b>试听方式：</b>辅音用「辅音＋ㅏ」朗读本音（ㄱ → <b>가</b>、ㄷ → <b>다</b>、ㅂ → <b>바</b>），
+        不念字母名。无韩语音色时自动用中文近似（嘎 / 搭 / 巴），保证彼此可区分。
       </p>
     </div>
   </section>
@@ -748,7 +748,7 @@ footer p { margin: 4px 0; }
         <div class="tts-controls">
           <span style="font-size:12px;color:var(--muted)">发音模式</span>
           <div class="tts-mode-group" id="ttsModeGroup" role="group" aria-label="发音模式">
-            <button type="button" data-mode="auto" aria-pressed="true">自动（韩语原音）</button>
+            <button type="button" data-mode="auto" aria-pressed="true">自动</button>
             <button type="button" data-mode="ko" aria-pressed="false">韩语原音</button>
             <button type="button" data-mode="zh" aria-pressed="false">中文近似音</button>
           </div>
@@ -758,11 +758,11 @@ footer p { margin: 4px 0; }
       </div>
 
       <ul>
-        <li><b>发音方式以「韩语原音」为默认。</b>本页把<b>韩文原字</b>交给浏览器，并把 <code>lang</code> 设为 <code>ko-KR</code>，由引擎自己路由音色。即使系统语音列表里没有列出 <code>ko-KR</code>，大多数浏览器/系统仍能正确朗读韩文（Edge 的在线神经音色、Windows OneCore 音色、Safari 的 Yuna 常常不出现在列表里）。</li>
-        <li><b>三种发音模式。</b>「自动（韩语原音）」与「韩语原音」都是韩文原字朗读；「中文近似音」改用中文音色念近似汉字（ㄱ→嘎、ㄷ→搭、ㅂ→巴），彼此可区分，但整音节（如 넉）无法准确朗读，听力题会自动关闭。<b>如果听着不对，用自检面板里的「A/B 对比」按钮当场判断</b>，再一键切换。</li>
+        <li><b>自动模式会检测韩语音色。</b>有 <code>ko-KR</code> 就念真韩语（ㄱ→가）；没有则自动用中文近似音练本音（ㄱ→嘎）。你这台电脑目前列表里只有中文音色，所以自动走近似音——这是预期行为，不是字母映射错了。</li>
+        <li><b>三种发音模式。</b>「自动」按上面规则切换；「韩语原音」强制走 <code>ko-KR</code>（与桌面跟读卡相同，但没装韩语包时听感往往不准）；「中文近似音」强制用近似汉字。可用「A/B 对比」按钮当场听差别。</li>
         <li><b>怎么装韩语语音包。</b>Windows：设置 → 时间和语言 → 语言和区域 → 添加语言 → 한국어 → 勾选「语音」→ 安装后重启浏览器。macOS：系统设置 → 辅助功能 → 朗读内容 → 系统声音 → 管理声音 → 한국어 → 下载「Yuna」（macOS 通常已内置，Safari 与 Chrome 都能直接用）。Chrome / Edge 联网时通常还能拿到在线音色（Google 한국의 / Microsoft SunHi 等），可在自检面板的下拉框里手动指定。</li>
         <li><b>macOS 使用说明。</b>本页是纯前端单文件，Safari / Chrome / Edge 都能用。<b>Safari 的额外限制</b>：朗读必须由真实点击或按键触发（已自动处理，含首次手势解锁），所以不要期待「打开页面就自动读」；另外 Safari 对 <code>file://</code> 的 localStorage 支持不稳定，建议用下面的线上地址或 <code>python3 -m http.server</code> 打开，避免学习记录存不下来。</li>
-        <li><b>单字母直接念字母本身。</b>与桌面跟读卡相同：点 ㄱ 就念「ㄱ」，点 ㅏ 就念「ㅏ」，不再预先合成 가 / 아。完整音节请到拼读工作台组合后播放。</li>
+        <li><b>单字母练的是本音，不是字母名。</b>点 ㄱ 听的是「가」，不是「기역」。没有韩语音色时会自动改用中文近似音（嘎/搭/巴）；装好韩语语音包后点「重新检测」即可。</li>
         <li><b>ㅓ vs ㅗ 最容易混。</b>ㅓ 是 /ʌ/，双唇<b>不圆</b>；ㅗ 是 /o/，双唇必须<b>收圆前突</b>。TTS 有时会把 ㅓ 读得偏圆。</li>
         <li><b>ㅐ / ㅔ 已基本合并。</b>现代首尔音里两者几乎同音；ㅙ / ㅚ / ㅞ 也趋同，听到相同读音是正常的。</li>
         <li><b>紧音 ㄲ ㄸ ㅃ ㅆ ㅉ</b> 是「喉部绷紧、不送气」，不是送气音。TTS 可能读成松音或送气音，听的时候注意短促、有力。</li>
@@ -1122,14 +1122,19 @@ footer p { margin: 4px 0; }
     },
 
     /* 当前真正生效的模式
-       ★ 这里以「实测听感」为准，而不是以 getVoices() 是否枚举到韩语音色为准：
-         很多环境（Edge 的在线神经音色、Windows OneCore 音色、Safari）在
-         getVoices() 里看不到 ko-KR，但把韩文原字交给引擎并按 lang='ko-KR' 朗读
-         是正确的 —— 旧版单文件正是这么做的，听感也对。
-         所以默认一律走「韩语原音」，中文近似音只作为用户主动选择的兜底。 */
+       本机实测：没有 ko-KR 语音包时，把韩文交给系统几乎发不出正确韩语
+      （本地 SAPI 合成韩文是空音频）。此时若仍硬走 ko-KR，听感会「不像韩语」。
+       自动模式策略：
+         - 有韩语音色 → 韩语原音（念 가/다/바）
+         - 无韩语音色但有中文 → 中文近似音（嘎/搭/巴，彼此可区分，接近本音）
+         - 手动「韩语原音」仍可强制走 ko-KR（与桌面跟读卡相同路径） */
     activeMode: function () {
-      if (this.mode === 'zh') return this.zhVoice ? 'zh' : 'ko';
-      return 'ko'; // auto / ko 都是韩语原音
+      if (this.mode === 'zh') return this.zhVoice ? 'zh' : (this.koVoice ? 'ko' : 'none');
+      if (this.mode === 'ko') return 'ko'; // 强制韩语
+      // auto
+      if (this.koVoice) return 'ko';
+      if (this.zhVoice) return 'zh';
+      return 'ko'; // 都没有时仍尝试 ko-KR 系统路由
     },
 
     updateStatus: function (silent) {
@@ -1138,19 +1143,25 @@ footer p { margin: 4px 0; }
       if (m === 'ko' && this.koVoice) {
         setTtsStatus('韩语音色 · ' + this.koVoice.name, 'ok');
         this.banner('', false);
-      } else if (m === 'ko') {
-        setTtsStatus('韩语原音 · 未列出韩语音色', 'warn');
+      } else if (m === 'ko' && this.mode === 'ko') {
+        setTtsStatus('强制韩语原音 · 未列出韩语音色', 'warn');
         this.banner(
-          '系统语音列表里没有 <code>ko-KR</code> 音色，但本页仍按<b>韩语原音</b>朗读（把韩文原字交给引擎，' +
-          'lang 设为 ko-KR）——多数情况下这样是对的，和旧版单文件行为一致。' +
-          '若你听着觉得不对（比如几个字母同一个音），点下面的按钮改成<b>中文近似音</b>。',
+          '你选了「韩语原音」，但系统列表里没有 <code>ko-KR</code>。本页仍按桌面跟读卡方式朗读；' +
+          '若听起来不像韩语，请安装韩语语音包，或改用「中文近似音」。',
           false
         );
       } else if (m === 'zh') {
-        setTtsStatus('中文近似音', 'warn');
+        setTtsStatus('中文近似音（无韩语音色）', 'warn');
         this.banner(
-          '当前使用<b>中文近似音</b>：每个字母用不同的近似字朗读（ㄱ→嘎、ㄷ→搭、ㅂ→巴），' +
-          '彼此可区分，但整音节（如 넉、즤）无法准确朗读，练习模式会自动只出「看字选组合」题。',
+          '未检测到韩语音色，已自动用<b>中文近似音</b>练本音：' +
+          'ㄱ→嘎、ㄷ→搭、ㅂ→巴、ㅋ→卡、ㅌ→他、ㅍ→怕（彼此不同）。' +
+          '这比硬念韩文更接近「辅音＋ㅏ」的口型。装好韩语语音包后点「重新检测」即可切换成真韩语。',
+          false
+        );
+      } else if (m === 'ko') {
+        setTtsStatus('韩语原音 · 系统路由', 'warn');
+        this.banner(
+          '未列出韩语音色，正尝试系统路由。若读音不对，请改用「中文近似音」或安装韩语语音包。',
           false
         );
       } else {
@@ -1171,7 +1182,7 @@ footer p { margin: 4px 0; }
         return;
       }
       el.className = 'tts-banner show' + (isError ? '' : ' ok');
-      var extra = this.mode === 'zh'
+      var extra = this.activeMode() === 'zh'
         ? '<button class="btn" type="button" data-act="useko">改用韩语原音</button>'
         : '<button class="btn" type="button" data-act="usezh">改用中文近似音</button>';
       el.innerHTML = (isError ? '⚠️ ' : 'ℹ️ ') + html +
@@ -1377,16 +1388,21 @@ footer p { margin: 4px 0; }
     return TTS.speak(demo, { zhText: zhApprox });
   }
 
-  /* 单个字母试听 —— 与桌面可用版完全一致：直接念字母本身（ㄱ / ㅏ），
-     不再合成 가 / 아。无韩语音色时，合成音节会被系统塌成同一个音；
-     直接念字母则与 korean-phonics.html 听感一致。
-     zhText 仅在用户手动切到「中文近似音」时使用。 */
+  /* 单个字母试听 —— 练的是「本音」，不是字母名：
+       元音：ㅇ + 该元音（ㅏ → 아）
+       辅音：该辅音 + ㅏ（ㄱ → 가）
+     直接念 ㄱ 时 TTS 常会读成字母名「기역」，听感就不对。
+     韩语原音念 가/다/바；中文近似音念 嘎/搭/巴。 */
   function speakLetter(ch, opts) {
     opts = opts || {};
     var v = VOWEL_MAP.get(ch);
-    if (v) return TTS.speak(ch, { zhText: v.zh, rate: opts.rate });
+    if (v) {
+      return TTS.speak(compose(11, v.idx, 0), { zhText: v.zh, rate: opts.rate });
+    }
     var c = CONS_MAP.get(ch);
-    if (c) return TTS.speak(ch, { zhText: c.zh, rate: opts.rate });
+    if (c) {
+      return TTS.speak(compose(c.idx, 0, 0), { zhText: c.zh, rate: opts.rate });
+    }
     return TTS.speak(ch, { zhText: ch, rate: opts.rate });
   }
 
@@ -2104,7 +2120,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-08.8';
+  var BUILD = '2026-11-08.9';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
