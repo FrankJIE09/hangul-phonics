@@ -166,8 +166,10 @@ section { scroll-margin-top: 62px; margin-bottom: 34px; }
 .btn.ghost { background: var(--surface); border-color: var(--border); color: var(--text); }
 .btn.ghost:hover { background: var(--surface-2); filter: none; }
 .btn:disabled { opacity: .42; cursor: not-allowed; filter: none; }
-.btn:focus-visible, .icon-btn:focus-visible, .tile:focus-visible,
-.chip:focus-visible, .opt:focus-visible, .fchip:focus-visible {
+.btn:focus-visible, .icon-btn:focus-visible, .tile-hit:focus-visible,
+.tile-save:focus-visible, .chip:focus-visible, .opt:focus-visible,
+.fchip:focus-visible, .ko-full:focus-visible, .eojeol-word:focus-visible,
+.syl-btn:focus-visible, .jamo-btn:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
@@ -231,15 +233,28 @@ section { scroll-margin-top: 62px; margin-bottom: 34px; }
 }
 .tile {
   position: relative;
-  display: flex; flex-direction: column; align-items: flex-start;
-  gap: 1px; padding: 13px 14px 12px;
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 0;
   background: var(--surface); text-align: left;
   border: 1px solid var(--border); border-radius: var(--radius);
-  cursor: pointer;
   transition: border-color .12s ease, background .12s ease;
 }
 .tile:hover { border-color: var(--accent); background: var(--accent-weak); }
 .tile.playing { border-color: var(--accent); background: var(--accent-weak); }
+.tile-hit {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 1px; width: 100%; padding: 13px 14px 30px;
+  border: 0; border-radius: inherit; background: transparent;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.tile-save {
+  position: absolute; right: 8px; bottom: 7px; z-index: 1;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); border-radius: 7px;
+  font-size: 11px; line-height: 1.4; padding: 1px 6px; cursor: pointer;
+}
+.tile-save:hover { color: var(--accent-text); border-color: var(--accent); }
+.tile-save.on { color: var(--ok); border-color: var(--ok); background: var(--ok-weak); }
 .tile-key {
   position: absolute; top: 9px; right: 11px;
   font-family: var(--mono); font-size: 10.5px; color: var(--muted);
@@ -255,9 +270,8 @@ section { scroll-margin-top: 62px; margin-bottom: 34px; }
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.tile.learned::after {
-  content: "✓"; position: absolute; right: 11px; bottom: 9px;
-  font-size: 10px; color: var(--ok);
+.tile.learned .tile-char::after {
+  content: "✓"; font-size: 12px; margin-left: 4px; color: var(--ok);
 }
 .note-inline {
   font-size: 11.5px; color: var(--muted); margin: 10px 0 0;
@@ -319,6 +333,83 @@ select {
   margin-top: 6px; max-width: 260px;
 }
 .wb-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+
+/* ==========================================================================
+   7.5 中文转韩文
+   ========================================================================== */
+.tr-input {
+  width: 100%; min-height: 96px; resize: vertical;
+  font: inherit; font-size: 16px; line-height: 1.55; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+}
+.tr-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tr-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tr-status { min-height: 1.3em; margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
+.tr-status.ok { color: var(--ok); }
+.tr-status.bad { color: var(--bad); }
+#trResult { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+#trResult[hidden] { display: none !important; }
+.tr-source { font-size: 13px; color: var(--muted); }
+.ko-full {
+  display: block; width: 100%; text-align: left;
+  font: inherit; font-size: 28px; font-weight: 700; line-height: 1.45;
+  padding: 12px 14px; border-radius: 14px;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: inherit; cursor: pointer; word-break: keep-all;
+}
+.ko-full:hover { border-color: var(--accent); background: var(--accent-weak); }
+.tr-legend { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.55; }
+.ko-flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.eojeol {
+  flex: 1 1 240px;
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px; background: var(--surface-2);
+}
+.eojeol-word {
+  font: inherit; font-size: 18px; font-weight: 700;
+  border: 0; border-radius: 10px; padding: 6px 12px; cursor: pointer;
+  background: var(--accent); color: #fff;
+}
+.eojeol-word:hover { filter: brightness(1.06); }
+.syl-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; align-items: flex-start; }
+.syl-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex: 0 0 auto; padding: 8px 8px 6px; border-radius: 12px;
+  background: var(--bg);
+}
+.syl-btn, .jamo-btn {
+  font: inherit; font-weight: 700; cursor: pointer; color: inherit;
+  border: 1px solid var(--border); background: var(--surface);
+}
+.syl-btn {
+  font-size: 24px; min-width: 48px; padding: 4px 8px; border-radius: 10px;
+}
+.jamo-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.jamo-btn {
+  font-size: 14px; min-width: 28px; height: 28px; padding: 0 5px; border-radius: 8px;
+}
+.syl-btn:hover, .jamo-btn:hover { border-color: var(--accent); background: var(--accent-weak); }
+.punct-token {
+  font-size: 22px; font-weight: 700; color: var(--muted);
+  padding: 8px 2px; align-self: center;
+}
+.loose-jamos { align-self: center; }
+.speakable.playing { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tr-saved { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--border); }
+.tr-saved h3 { font-size: 14px; margin-bottom: 6px; }
+.tr-saved h3 .count { font-size: 11px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.saved-list { display: flex; flex-direction: column; gap: 8px; }
+.saved-item {
+  display: flex; gap: 10px; align-items: flex-start; justify-content: space-between;
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; background: var(--surface-2);
+}
+.saved-ko { font-size: 18px; font-weight: 700; line-height: 1.35; word-break: keep-all; }
+.saved-zh { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.saved-time { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.saved-actions { display: flex; gap: 6px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+.saved-actions .btn { padding: 6px 10px; font-size: 12px; }
 
 /* ==========================================================================
    8. 练习模式
@@ -510,6 +601,8 @@ footer p { margin: 4px 0; }
   .pr-options { grid-template-columns: 1fr; }
   .pr-prompt { font-size: 52px; }
   .wb-char { font-size: 76px; }
+  .ko-full { font-size: 22px; }
+  .saved-item { flex-direction: column; }
   .panel { padding: 16px; }
   section { margin-bottom: 28px; }
 }
@@ -524,7 +617,7 @@ footer p { margin: 4px 0; }
       <div class="brand-mark" aria-hidden="true">한</div>
       <div>
         <h1>韩语谚文拼读练习</h1>
-        <p class="sub">Hangul Phonics · 字母发音 · 拼字工作台 · 随机练习</p>
+        <p class="sub">Hangul Phonics · 中文转韩文 · 字母发音 · 拼字工作台</p>
       </div>
     </div>
     <div class="header-actions">
@@ -538,6 +631,7 @@ footer p { margin: 4px 0; }
 <!-- ======================= 目录导航 ======================= -->
 <nav class="toc" aria-label="页面导航">
   <div class="container toc-inner">
+    <a href="#translate">中文转韩文</a>
     <a href="#progress">学习进度</a>
     <a href="#vowels">元音区</a>
     <a href="#consonants">辅音区</a>
@@ -553,6 +647,38 @@ footer p { margin: 4px 0; }
 
   <!-- 发音环境提示：无韩语音色时自动出现 -->
   <div class="tts-banner" id="ttsBanner" role="status"></div>
+
+  <!-- ======================= 中文转韩文 ======================= -->
+  <section id="translate">
+    <div class="section-head">
+      <h2>中文转韩文 <span class="sec-kr">번역</span></h2>
+      <p class="hint">转换后可按键朗读；拆开的韩文、韩字和字母都能点读。只有按下「保存」才写入本机</p>
+    </div>
+    <div class="panel">
+      <label class="sub" for="zhInput" style="display:block;font-size:12.5px;margin-bottom:6px">输入中文，也可以直接粘贴韩文来拆开</label>
+      <textarea id="zhInput" class="tr-input" rows="3" maxlength="2000" placeholder="例如：你好，今天天气很好。我想学习韩语。"></textarea>
+      <div class="tr-actions">
+        <button class="btn" id="zhConvert" type="button">转换成韩文</button>
+        <button class="btn" id="zhSpeak" type="button" disabled>朗读韩文</button>
+        <button class="btn ghost" id="zhSave" type="button" disabled>保存</button>
+      </div>
+      <p class="tr-status" id="trStatus" role="status">转换需要联网。朗读、拆字和保存都在本机完成，不写进网址。</p>
+      <div id="trResult" hidden>
+        <div class="tr-source" id="trSource"></div>
+        <button class="ko-full speakable" id="trKoFull" type="button" data-say="all" title="点击朗读整段韩文"></button>
+        <p class="tr-legend">整段可以点，也可以按「朗读韩文」。下面先拆开每一截韩文，每个韩字再拆成初声、中声、收音。点哪一块，就读哪一块。</p>
+        <div class="ko-flow" id="trBreakdown"></div>
+      </div>
+      <div class="tr-saved">
+        <h3>已保存的转换 <span class="count" id="trSavedCount">0</span></h3>
+        <p class="hint" style="margin:0 0 8px">和复习记录存在同一份本地数据里。不管页面路径、问号或井号怎么变，都读写这一处。转换和点读本身不会写入，只有按下「保存」才写入。</p>
+        <div class="saved-list" id="trSaved"></div>
+        <div class="tr-actions">
+          <button class="btn ghost" id="trClear" type="button">清空已保存的转换</button>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ======================= 1. 学习进度 ======================= -->
   <section id="progress">
@@ -577,7 +703,7 @@ footer p { margin: 4px 0; }
   <section id="vowels">
     <div class="section-head">
       <h2>① 元音区 <span class="sec-kr">모음</span></h2>
-      <p class="hint">共 21 个 · 点击方块或按键盘字母试听</p>
+      <p class="hint">共 21 个 · 点击方块或按键盘字母试听 · 右下角「存」才写入复习</p>
     </div>
     <div class="panel">
       <div id="vowelGroups"></div>
@@ -592,7 +718,7 @@ footer p { margin: 4px 0; }
   <section id="consonants">
     <div class="section-head">
       <h2>② 辅音区 <span class="sec-kr">자음</span></h2>
-      <p class="hint">松音 5 · 送气音 5 · 紧音 5 · 鼻音/流音 4</p>
+      <p class="hint">松音 5 · 送气音 5 · 紧音 5 · 鼻音/流音 4 · 右下角「存」才写入复习</p>
     </div>
     <div class="panel">
       <div id="consonantGroups"></div>
@@ -632,7 +758,7 @@ footer p { margin: 4px 0; }
           <div class="wb-final-note" id="wbFinalNote"></div>
           <div class="wb-actions">
             <button class="btn" id="wbPlay" type="button">🔊 播放音节</button>
-            <button class="btn ghost" id="wbSave" type="button">＋ 加入复习</button>
+            <button class="btn ghost" id="wbSave" type="button">保存</button>
           </div>
         </div>
       </div>
@@ -661,6 +787,7 @@ footer p { margin: 4px 0; }
       <div class="pr-actions">
         <button class="btn" id="prStart" type="button">开始练习</button>
         <button class="btn ghost" id="prReplay" type="button" hidden>🔊 再听一次</button>
+        <button class="btn ghost" id="prSave" type="button" disabled>保存这题</button>
         <button class="btn ghost" id="prNext" type="button" disabled>下一题 →</button>
         <button class="btn ghost" id="prReset" type="button">重置统计</button>
       </div>
@@ -671,22 +798,22 @@ footer p { margin: 4px 0; }
   <section id="review">
     <div class="section-head">
       <h2>⑤ 复习面板 <span class="sec-kr">복습</span></h2>
-      <p class="hint">自动保存在本地（localStorage），下次打开仍在</p>
+      <p class="hint">只有按下「保存」或字母上的「存」才写入本机，下次打开仍在</p>
     </div>
     <div class="panel">
       <div class="rev-grid">
         <div class="rev-col">
-          <h3>点过的字母 <span class="count" id="revLetterCount">0</span></h3>
+          <h3>保存的字母 <span class="count" id="revLetterCount">0</span></h3>
           <div class="chips" id="revLetters"></div>
         </div>
         <div class="rev-col">
-          <h3>练习/拼过的音节 <span class="count" id="revSylCount">0</span></h3>
+          <h3>保存的音节 <span class="count" id="revSylCount">0</span></h3>
           <div class="chips" id="revSyllables"></div>
         </div>
       </div>
       <div class="rev-actions">
         <button class="btn ghost" id="revClear" type="button">清空复习记录</button>
-        <span class="rev-tip">点击记录可重复播放；× 可单独移除。</span>
+        <span class="rev-tip">点击记录可重复播放；× 可单独移除。点字母、播放音节、做练习都不会自动写入。</span>
       </div>
     </div>
   </section>
@@ -879,6 +1006,11 @@ footer p { margin: 4px 0; }
     { idx: 27, ch: 'ㅎ', rom: 't',  ipa: 't̚' }
   ];
 
+  // 拆韩字用的字母表，序号与 Unicode 组合公式一致
+  var CHO_JAMO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  var JUNG_JAMO = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+  var JONG_JAMO = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
   var VOWEL_MAP = new Map(VOWELS.map(function (v) { return [v.ch, v]; }));
   var CONS_MAP  = new Map(CONSONANTS.map(function (c) { return [c.ch, c]; }));
   var FINAL_MAP = new Map(FINALS.map(function (f) { return [f.ch, f]; }));
@@ -908,6 +1040,11 @@ footer p { margin: 4px 0; }
      ========================================================================== */
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
 
   /* ---------- 平台 / 浏览器判定 ----------
      Safari（含 iOS 上的所有浏览器）对 Web Speech API 有两条硬性限制，必须区别对待：
@@ -950,13 +1087,16 @@ footer p { margin: 4px 0; }
   /* ==========================================================================
      3. 本地存储 / 全局状态
      ========================================================================== */
+  /* 固定键名，故意不带网址、路径或参数。
+     同一个网站来源下，打开 / 、/index.html 或带 ?、# 的地址，都读写这一份。 */
   var STORE_KEY = 'hangul-phonics-v1';
 
   var Store = {
     data: {
       learned: [],            // 听过的字母
-      reviewLetters: [],      // 复习：字母
-      reviewSyllables: [],    // 复习：音节
+      reviewLetters: [],      // 复习：字母（只在按下保存时写入）
+      reviewSyllables: [],    // 复习：音节（只在按下保存时写入）
+      translations: [],       // 中文转韩文（只在按下保存时写入）
       stats: { correct: 0, total: 0 },
       theme: null,
       ttsMode: 'auto',        // auto | ko | zh
@@ -970,6 +1110,14 @@ footer p { margin: 4px 0; }
         if (Array.isArray(parsed.learned)) this.data.learned = parsed.learned;
         if (Array.isArray(parsed.reviewLetters)) this.data.reviewLetters = parsed.reviewLetters;
         if (Array.isArray(parsed.reviewSyllables)) this.data.reviewSyllables = parsed.reviewSyllables;
+        if (Array.isArray(parsed.translations)) {
+          this.data.translations = parsed.translations.filter(function (item) {
+            return item && typeof item.ko === 'string' && typeof item.zh === 'string';
+          }).map(function (item, i) {
+            if (!item.id) item.id = 't' + i + '-' + (item.at || 0);
+            return item;
+          });
+        }
         if (parsed.stats && typeof parsed.stats.total === 'number') {
           this.data.stats = {
             correct: Number(parsed.stats.correct) || 0,
@@ -1008,6 +1156,20 @@ footer p { margin: 4px 0; }
       if (list.length > 80) list.length = 80;
       this.save();
       Review.render();
+    },
+    addTranslation: function (entry) {
+      var list = this.data.translations;
+      var key = entry.zh + '\n' + entry.ko;
+      for (var i = 0; i < list.length; i++) {
+        if ((list[i].zh + '\n' + list[i].ko) === key) {
+          list.splice(i, 1);
+          break;
+        }
+      }
+      list.unshift(entry);
+      if (list.length > 40) list.length = 40;
+      this.save();
+      if (typeof Translate !== 'undefined') Translate.renderSaved();
     }
   };
 
@@ -1254,7 +1416,7 @@ footer p { margin: 4px 0; }
     speak: function (koText, opts) {
       opts = opts || {};
       if (!this.supported) return false;
-      var mode = opts.forceZh ? 'zh' : this.activeMode();
+      var mode = opts.forceKo ? 'ko' : (opts.forceZh ? 'zh' : this.activeMode());
       var self = this;
 
       // ---------- 中文近似音（仅手动切换时） ----------
@@ -1406,11 +1568,10 @@ footer p { margin: 4px 0; }
     return TTS.speak(ch, { zhText: ch, rate: opts.rate });
   }
 
-  // 统一的「播放字母」入口：发音 + 记进度 + 记复习
+  // 播放字母：只发音并计入「已听读」进度。写入复习必须另按「存」。
   function playLetter(ch) {
     speakLetter(ch);
     Store.learn(ch);
-    Store.addReviewLetter(ch);
     flashTile(ch);
   }
 
@@ -1473,7 +1634,7 @@ footer p { margin: 4px 0; }
               '<button class="rev-del" type="button" data-kind="letter" data-ch="' + ch + '" aria-label="移除 ' + ch + '">×</button>' +
               '</span>';
           }).join('')
-        : '<span class="empty">还没有点击过字母</span>';
+        : '<span class="empty">还没有保存的字母。点字母只朗读，按「存」才写入。</span>';
 
       $('#revSyllables').innerHTML = syls.length
         ? syls.map(function (ch) {
@@ -1482,13 +1643,19 @@ footer p { margin: 4px 0; }
               '<button class="rev-del" type="button" data-kind="syllable" data-ch="' + ch + '" aria-label="移除 ' + ch + '">×</button>' +
               '</span>';
           }).join('')
-        : '<span class="empty">练习或拼读后会自动出现</span>';
+        : '<span class="empty">在拼读工作台或练习里按下「保存」后会出现。</span>';
+
+      $$('.tile-save').forEach(function (btn) {
+        var on = letters.indexOf(btn.dataset.ch) !== -1;
+        btn.classList.toggle('on', on);
+        btn.textContent = on ? '已存' : '存';
+      });
     },
     updateTitles: function () {
       var tip = $('#storageTip');
       if (!tip) return;
       tip.textContent = storageOK
-        ? '记录保存在本机浏览器，换设备/清缓存会丢失。'
+        ? '保存在本机浏览器的固定位置。同一网站下，页面路径、问号和井号都读写这一份。'
         : '当前浏览器禁止本地存储，记录不会被保存。';
     }
   };
@@ -1498,13 +1665,16 @@ footer p { margin: 4px 0; }
      ========================================================================== */
   function tileHTML(item) {
     var title = (item.name ? item.name + ' ｜ ' : '') + item.en + ' ｜ ' + item.tip;
-    return '<button class="tile" type="button" data-ch="' + item.ch + '" title="' + title + '">' +
+    return '<div class="tile" data-ch="' + item.ch + '">' +
+      '<button class="tile-hit" type="button" data-ch="' + item.ch + '" title="' + title + '">' +
       '<span class="tile-key">' + item.kbd + '</span>' +
       '<span class="tile-char">' + item.ch + '</span>' +
       '<span class="tile-ipa">/' + item.ipa + '/</span>' +
       '<span class="tile-en">' + item.en + '</span>' +
       '<span class="tile-tip">' + item.tip + '</span>' +
-      '</button>';
+      '</button>' +
+      '<button class="tile-save" type="button" data-ch="' + item.ch + '" title="保存到复习。只点字母不会保存。">存</button>' +
+      '</div>';
   }
 
   var VOWEL_GROUPS = [
@@ -1677,6 +1847,7 @@ footer p { margin: 4px 0; }
       this.answered = false;
       $('#prStart').hidden = true;
       $('#prNext').disabled = true;
+      $('#prSave').disabled = false;
       $('#prFeedback').textContent = '';
       $('#prFeedback').className = 'pr-feedback';
 
@@ -1731,9 +1902,6 @@ footer p { margin: 4px 0; }
       if (ok) Store.data.stats.correct += 1;
       Store.save();
       this.renderStats();
-
-      // 练习过的音节进入复习
-      Store.addReviewSyllable(q.ch);
 
       // 高亮选项
       var buttons = $$('#prOptions .opt');
@@ -1859,9 +2027,349 @@ footer p { margin: 4px 0; }
   }
 
   /* ==========================================================================
+     11.7 中文转韩文
+     ========================================================================== */
+  function decomposeSyllable(ch) {
+    var code = ch.charCodeAt(0);
+    if (code < 0xAC00 || code > 0xD7A3) return null;
+    var s = code - 0xAC00;
+    var fin = s % 28;
+    var vow = Math.floor(s / 28) % 21;
+    var ini = Math.floor(s / 28 / 21);
+    return {
+      ch: ch,
+      ini: CHO_JAMO[ini],
+      vow: JUNG_JAMO[vow],
+      fin: JONG_JAMO[fin]
+    };
+  }
+
+  function tokenizeKorean(text) {
+    var out = [];
+    var re = /\s+|([가-힣]+)|([ㄱ-ㆎ]+)|([^\s가-힣ㄱ-ㆎ]+)/g;
+    var m;
+    while ((m = re.exec(text))) {
+      if (/^\s+$/.test(m[0])) continue;
+      if (m[1]) {
+        var syls = [];
+        for (var i = 0; i < m[1].length; i++) {
+          var d = decomposeSyllable(m[1].charAt(i));
+          if (d) syls.push(d);
+        }
+        out.push({ type: 'word', text: m[1], syllables: syls });
+      } else if (m[2]) {
+        var js = [];
+        for (var j = 0; j < m[2].length; j++) js.push(m[2].charAt(j));
+        out.push({ type: 'jamos', text: m[2], jamos: js });
+      } else {
+        out.push({ type: 'mark', text: m[0] });
+      }
+    }
+    return out;
+  }
+
+  function translateZhToKo(text) {
+    var chunks = [];
+    var rest = text;
+    while (rest.length) {
+      if (rest.length <= 420) {
+        chunks.push(rest);
+        break;
+      }
+      var slice = rest.slice(0, 420);
+      var cut = Math.max(
+        slice.lastIndexOf('。'),
+        slice.lastIndexOf('！'),
+        slice.lastIndexOf('？'),
+        slice.lastIndexOf('\n'),
+        slice.lastIndexOf('，'),
+        slice.lastIndexOf(',')
+      );
+      if (cut < 80) cut = 420;
+      else cut += 1;
+      chunks.push(rest.slice(0, cut));
+      rest = rest.slice(cut).replace(/^\s+/, '');
+    }
+
+    var chain = Promise.resolve('');
+    chunks.forEach(function (chunk) {
+      chain = chain.then(function (acc) {
+        var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+        var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+        var opts = ctrl ? { signal: ctrl.signal } : {};
+        return fetch('https://api.mymemory.translated.net/get?langpair=zh-CN|ko&q=' + encodeURIComponent(chunk), opts)
+          .then(function (r) {
+            clearTimeout(timer);
+            if (!r.ok) throw new Error('翻译服务暂时不可用（' + r.status + '）。');
+            return r.json();
+          }, function (err) {
+            clearTimeout(timer);
+            throw err;
+          })
+          .then(function (data) {
+            var out = data && data.responseData && data.responseData.translatedText || '';
+            out = String(out).replace(/\s+$/, '');
+            if (!out || /MYMEMORY WARNING|QUERY LENGTH|INVALID LANGUAGE/i.test(out)) {
+              throw new Error('今天的免费翻译额度用完了，或这句话太长。请稍后再试，或缩短一点。');
+            }
+            return acc + out;
+          });
+      });
+    });
+    return chain;
+  }
+
+  function jamoButton(role, ch) {
+    var label = role === 'ini' ? '初声' : (role === 'vow' ? '中声' : '收音');
+    return '<button type="button" class="jamo-btn speakable" data-say="jamo" data-role="' + role +
+      '" data-text="' + esc(ch) + '" title="' + label + ' ' + esc(ch) + '，点击朗读">' + esc(ch) + '</button>';
+  }
+
+  function syllableCard(syl) {
+    var jamos = jamoButton('ini', syl.ini) + jamoButton('vow', syl.vow);
+    if (syl.fin) jamos += jamoButton('fin', syl.fin);
+    return '<div class="syl-card">' +
+      '<button type="button" class="syl-btn speakable" data-say="syl" data-text="' + esc(syl.ch) +
+      '" title="点击朗读这个韩字">' + esc(syl.ch) + '</button>' +
+      '<div class="jamo-row">' + jamos + '</div>' +
+      '</div>';
+  }
+
+  function formatStamp(ts) {
+    var d = new Date(ts || Date.now());
+    function z(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) +
+      ' ' + z(d.getHours()) + ':' + z(d.getMinutes());
+  }
+
+  var Translate = {
+    current: null,
+
+    init: function () {
+      this.renderSaved();
+    },
+
+    setStatus: function (text, kind) {
+      var el = $('#trStatus');
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'tr-status' + (kind ? ' ' + kind : '');
+    },
+
+    breakdownHTML: function (ko) {
+      var tokens = tokenizeKorean(ko);
+      if (!tokens.length) return '<span class="empty">没有可拆开的韩文。</span>';
+      return tokens.map(function (tok) {
+        if (tok.type === 'word') {
+          return '<article class="eojeol">' +
+            '<button type="button" class="eojeol-word speakable" data-say="word" data-text="' + esc(tok.text) +
+            '" title="点击朗读这一截韩文">' + esc(tok.text) + '</button>' +
+            '<div class="syl-row">' + tok.syllables.map(syllableCard).join('') + '</div>' +
+            '</article>';
+        }
+        if (tok.type === 'jamos') {
+          return '<div class="jamo-row loose-jamos">' + tok.jamos.map(function (ch) {
+            var role = VOWEL_MAP.has(ch) ? 'vow' : 'ini';
+            return jamoButton(role, ch);
+          }).join('') + '</div>';
+        }
+        return '<span class="punct-token">' + esc(tok.text) + '</span>';
+      }).join('');
+    },
+
+    show: function (zh, ko) {
+      this.current = { zh: zh, ko: ko };
+      $('#zhSpeak').disabled = false;
+      $('#zhSave').disabled = false;
+      $('#trResult').hidden = false;
+      $('#trSource').textContent = zh && zh !== ko ? ('原文：' + zh) : '';
+      var full = $('#trKoFull');
+      full.textContent = ko;
+      full.dataset.text = ko;
+      $('#trBreakdown').innerHTML = this.breakdownHTML(ko);
+    },
+
+    speakText: function (text, rate) {
+      if (!text) return;
+      if (!TTS.supported) {
+        this.setStatus('当前浏览器不能朗读。', 'bad');
+        return;
+      }
+      TTS.speak(text, { rate: rate || 0.85, forceKo: true });
+    },
+
+    speakJamo: function (role, ch) {
+      if (role === 'fin') {
+        var fin = FINAL_MAP.get(ch);
+        if (fin) {
+          speakFinal(fin.idx);
+          return;
+        }
+      }
+      speakLetter(ch);
+    },
+
+    run: function () {
+      var raw = $('#zhInput').value.replace(/\u00a0/g, ' ').trim();
+      if (!raw) {
+        this.setStatus('请先输入中文或韩文。', 'bad');
+        return;
+      }
+      if (raw.length > 2000) {
+        this.setStatus('一次最多 2000 字，请分段转换。', 'bad');
+        return;
+      }
+      var self = this;
+      if (!/[\u3400-\u9fff]/.test(raw)) {
+        if (/[가-힣ㄱ-ㆎ]/.test(raw)) {
+          self.show(raw, raw);
+          self.setStatus('这段已经是韩文，已拆开。点「保存」才会写入记录。', 'ok');
+          return;
+        }
+        self.setStatus('请输入中文，也可以直接粘贴韩文来拆开。', 'bad');
+        return;
+      }
+      self.setStatus('正在转换…', '');
+      $('#zhConvert').disabled = true;
+      translateZhToKo(raw).then(function (ko) {
+        $('#zhConvert').disabled = false;
+        ko = String(ko || '').trim();
+        if (!/[가-힣]/.test(ko)) {
+          self.setStatus('没有得到韩文，请换一种说法再试。', 'bad');
+          return;
+        }
+        self.show(raw, ko);
+        self.setStatus('已转换。整段、拆开的韩文和韩字都可以点读；只有按「保存」才会写入本机。', 'ok');
+      }, function (err) {
+        $('#zhConvert').disabled = false;
+        var msg = '转换需要联网，现在没有连上翻译服务。';
+        if (err && err.name === 'AbortError') msg = '转换超时，请检查网络后再试。';
+        else if (err && err.message && err.message !== 'Failed to fetch') msg = err.message;
+        self.setStatus(msg, 'bad');
+      });
+    },
+
+    saveCurrent: function () {
+      if (!this.current || !this.current.ko) return;
+      if (!storageOK) {
+        this.setStatus('当前浏览器禁止本地存储，按了保存也写不进去。', 'bad');
+        return;
+      }
+      Store.addTranslation({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        zh: this.current.zh,
+        ko: this.current.ko,
+        at: Date.now()
+      });
+      this.setStatus('已保存。它和复习记录在同一份本地数据里，不跟网址路径变化。', 'ok');
+      var btn = $('#zhSave');
+      var old = btn.textContent;
+      btn.textContent = '✓ 已保存';
+      btn.disabled = true;
+      setTimeout(function () {
+        btn.textContent = old;
+        btn.disabled = false;
+      }, 1200);
+    },
+
+    find: function (id) {
+      var list = Store.data.translations;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) return list[i];
+      }
+      return null;
+    },
+
+    openSaved: function (id) {
+      var item = this.find(id);
+      if (!item) return;
+      $('#zhInput').value = item.zh;
+      this.show(item.zh, item.ko);
+      this.setStatus('已打开保存的记录，可以点读。再次按保存会把它移到最前。', '');
+      var box = $('#trResult');
+      if (box && box.scrollIntoView) box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    },
+
+    removeTranslation: function (id) {
+      var list = Store.data.translations;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+          list.splice(i, 1);
+          Store.save();
+          this.renderSaved();
+          return;
+        }
+      }
+    },
+
+    renderSaved: function () {
+      var list = Store.data.translations || [];
+      var count = $('#trSavedCount');
+      var box = $('#trSaved');
+      if (!box) return;
+      if (count) count.textContent = String(list.length);
+      if (!list.length) {
+        box.innerHTML = '<span class="empty">还没有保存。转换或拆开之后，只有按下「保存」才会出现在这里。</span>';
+        return;
+      }
+      box.innerHTML = list.map(function (item) {
+        return '<div class="saved-item">' +
+          '<div>' +
+            '<div class="saved-ko">' + esc(item.ko) + '</div>' +
+            (item.zh && item.zh !== item.ko ? '<div class="saved-zh">' + esc(item.zh) + '</div>' : '') +
+            '<div class="saved-time">' + esc(formatStamp(item.at)) + '</div>' +
+          '</div>' +
+          '<div class="saved-actions">' +
+            '<button class="btn ghost" type="button" data-act="play" data-id="' + esc(item.id) + '">朗读</button>' +
+            '<button class="btn ghost" type="button" data-act="open" data-id="' + esc(item.id) + '">拆开</button>' +
+            '<button class="btn ghost" type="button" data-act="del" data-id="' + esc(item.id) + '" aria-label="删除这条保存">删除</button>' +
+          '</div>' +
+          '</div>';
+      }).join('');
+    },
+
+    bind: function () {
+      var self = this;
+      $('#zhConvert').addEventListener('click', function () { self.run(); });
+      $('#zhSpeak').addEventListener('click', function () {
+        if (self.current) self.speakText(self.current.ko, 0.9);
+      });
+      $('#zhSave').addEventListener('click', function () { self.saveCurrent(); });
+      $('#trResult').addEventListener('click', function (e) {
+        var el = e.target.closest('[data-say]');
+        if (!el) return;
+        var text = el.getAttribute('data-text') || '';
+        if (!text) return;
+        if (el.getAttribute('data-say') === 'jamo') self.speakJamo(el.getAttribute('data-role'), text);
+        else self.speakText(text, el.getAttribute('data-say') === 'all' ? 0.9 : 0.85);
+        el.classList.add('playing');
+        setTimeout(function () { el.classList.remove('playing'); }, 450);
+      });
+      $('#trSaved').addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (!btn || !btn.dataset.act) return;
+        var id = btn.dataset.id;
+        if (btn.dataset.act === 'open') self.openSaved(id);
+        else if (btn.dataset.act === 'play') {
+          var item = self.find(id);
+          if (item) self.speakText(item.ko, 0.9);
+        } else if (btn.dataset.act === 'del') self.removeTranslation(id);
+      });
+      $('#trClear').addEventListener('click', function () {
+        if (!Store.data.translations.length) return;
+        if (!window.confirm('确定清空已保存的中韩转换吗？字母和音节的复习记录会保留。')) return;
+        Store.data.translations = [];
+        Store.save();
+        self.renderSaved();
+      });
+    }
+  };
+
+  /* ==========================================================================
      12. 事件绑定
      ========================================================================== */
   function bindEvents() {
+    Translate.bind();
     // 主题
     $('#themeBtn').addEventListener('click', function () {
       applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
@@ -1948,10 +2456,15 @@ footer p { margin: 4px 0; }
       });
     }
 
-    // 字母方块（元音 + 辅音）
+    // 字母方块（元音 + 辅音）：点方块只朗读，「存」才写入复习
     document.addEventListener('click', function (e) {
-      var tile = e.target.closest('.tile');
-      if (tile) playLetter(tile.dataset.ch);
+      var saveBtn = e.target.closest('.tile-save');
+      if (saveBtn) {
+        Store.addReviewLetter(saveBtn.dataset.ch);
+        return;
+      }
+      var hit = e.target.closest('.tile-hit');
+      if (hit) playLetter(hit.dataset.ch);
     });
 
     // 本课重点 chips
@@ -1988,9 +2501,6 @@ footer p { margin: 4px 0; }
       var ch = $('#wbChar').textContent;
       if (!canSpeakSyllable()) { showSyllableBlocked(); return; }
       TTS.speak(ch, { rate: 0.85 });
-      Store.addReviewSyllable(ch);
-      Store.learn(CONS_MAP.get(WB.iniCh).ch);
-      Store.learn(VOWELS[WB.vowIdx].ch);
     });
     $('#wbSave').addEventListener('click', function () {
       var ch = $('#wbChar').textContent;
@@ -1999,7 +2509,7 @@ footer p { margin: 4px 0; }
       Store.learn(VOWELS[WB.vowIdx].ch);
       var btn = this;
       var old = btn.textContent;
-      btn.textContent = '✓ 已加入复习';
+      btn.textContent = '✓ 已保存';
       btn.disabled = true;
       clearTimeout(WB.saveTimer);
       WB.saveTimer = setTimeout(function () {
@@ -2011,6 +2521,14 @@ footer p { margin: 4px 0; }
     // 练习
     $('#prStart').addEventListener('click', function () { Practice.next(); });
     $('#prNext').addEventListener('click', function () { Practice.next(); });
+    $('#prSave').addEventListener('click', function () {
+      if (!Practice.q) return;
+      Store.addReviewSyllable(Practice.q.ch);
+      var btn = this;
+      var old = btn.textContent;
+      btn.textContent = '✓ 已保存';
+      setTimeout(function () { btn.textContent = old; }, 1200);
+    });
     $('#prReplay').addEventListener('click', function () {
       if (!Practice.q) return;
       if (!canSpeakSyllable()) { showSyllableBlocked(); return; }
@@ -2095,6 +2613,7 @@ footer p { margin: 4px 0; }
     renderTables();
     Progress.initFocus();
     Review.render();
+    Translate.init();
     WB.init();
     Practice.init();
     Progress.render();
@@ -2107,7 +2626,7 @@ footer p { margin: 4px 0; }
     tip.id = 'storageTip';
     tip.className = 'rev-tip';
     tip.style.margin = '8px 0 0';
-    var actions = document.querySelector('.rev-actions');
+    var actions = document.querySelector('#review .rev-actions');
     if (actions) actions.appendChild(tip);
     Review.updateTitles();
   }
@@ -2120,7 +2639,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-08.9';
+  var BUILD = '2026-11-09.2';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
