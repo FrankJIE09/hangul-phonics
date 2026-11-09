@@ -669,7 +669,7 @@ footer p { margin: 4px 0; }
   <section id="translate">
     <div class="section-head">
       <h2>中文转韩文 <span class="sec-kr">번역</span></h2>
-      <p class="hint">可输入中文、英文或数字。转换后给出英标，记忆文字可自行修改。只有按下「保存」才写入仓库里的 data/store.json</p>
+      <p class="hint">可输入中文、英文或数字。转换结果只保留韩文，并给出音标。记忆文字可自行修改。只有按下「保存」才写入仓库里的 data/store.json</p>
     </div>
     <div class="panel">
       <label class="sub" for="zhInput" style="display:block;font-size:12.5px;margin-bottom:6px">输入中文、英文或数字，也可以直接粘贴韩文来拆开</label>
@@ -685,8 +685,7 @@ footer p { margin: 4px 0; }
         <button class="ko-full speakable" id="trKoFull" type="button" data-say="all" title="点击朗读整段韩文"></button>
         <div class="tr-memory">
           <div>
-            <div class="tr-mem-label">英标 <span>罗马音和音标，用来记读音</span></div>
-            <div class="tr-rom" id="trRom"></div>
+            <div class="tr-mem-label">音标 <span>用来记读音</span></div>
             <div class="tr-ipa" id="trIpa"></div>
           </div>
           <div>
@@ -2292,15 +2291,59 @@ footer p { margin: 4px 0; }
     return out;
   }
 
+  function keepKoreanText(text) {
+    var out = String(text || '').replace(/[A-Za-z]+/g, ' ');
+    out = out.replace(/\(\s*\)|\[\s*\]|（\s*）/g, ' ');
+    out = out.replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+    out = out.replace(/\s+([,，.。!！?？:：;；、])/g, '$1');
+    out = out.replace(/^[,，.。!！?？:：;；、\-–—]+/, '');
+    out = out.replace(/[,，.。!！?？:：;；、\-–—]+$/, '');
+    return out.replace(/^\s+|\s+$/g, '');
+  }
+
+  function readGoogle(data) {
+    if (!data) return '';
+    if (typeof data === 'string') return data;
+    if (typeof data.length !== 'number') return '';
+    if (typeof data[0] === 'string') {
+      var joined = '';
+      for (var i = 0; i < data.length; i++) {
+        if (typeof data[i] === 'string') joined += data[i];
+      }
+      return joined;
+    }
+    if (!data[0] || typeof data[0].length !== 'number') return '';
+    var parts = '';
+    for (var j = 0; j < data[0].length; j++) {
+      var row = data[0][j];
+      if (row && typeof row[0] === 'string') parts += row[0];
+    }
+    return parts;
+  }
+
+  function fetchGoogle(url, signal) {
+    return fetch(url, signal ? { signal: signal } : {}).then(function (r) {
+      if (!r.ok) throw new Error('翻译服务暂时不可用（' + r.status + '）。');
+      return r.json();
+    }).then(function (data) {
+      var out = String(readGoogle(data) || '').replace(/^\s+|\s+$/g, '');
+      if (!out) throw new Error('没有得到翻译结果。');
+      return out;
+    });
+  }
+
   function translateText(text, pair) {
+    var bits = String(pair || 'en|ko').split('|');
+    var sl = bits[0] || 'en';
+    var tl = bits[1] || 'ko';
     var chunks = [];
     var rest = text;
     while (rest.length) {
-      if (rest.length <= 420) {
+      if (rest.length <= 450) {
         chunks.push(rest);
         break;
       }
-      var slice = rest.slice(0, 420);
+      var slice = rest.slice(0, 450);
       var cut = Math.max(
         slice.lastIndexOf('。'),
         slice.lastIndexOf('！'),
@@ -2312,7 +2355,7 @@ footer p { margin: 4px 0; }
         slice.lastIndexOf('!'),
         slice.lastIndexOf('?')
       );
-      if (cut < 80) cut = 420;
+      if (cut < 80) cut = 450;
       else cut += 1;
       chunks.push(rest.slice(0, cut));
       rest = rest.slice(cut).replace(/^\s+/, '');
@@ -2323,24 +2366,24 @@ footer p { margin: 4px 0; }
       chain = chain.then(function (acc) {
         var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
         var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
-        var opts = ctrl ? { signal: ctrl.signal } : {};
-        return fetch('https://api.mymemory.translated.net/get?langpair=' + pair + '&q=' + encodeURIComponent(chunk), opts)
-          .then(function (r) {
-            clearTimeout(timer);
-            if (!r.ok) throw new Error('翻译服务暂时不可用（' + r.status + '）。');
-            return r.json();
-          }, function (err) {
-            clearTimeout(timer);
-            throw err;
-          })
-          .then(function (data) {
-            var out = data && data.responseData && data.responseData.translatedText || '';
-            out = String(out).replace(/\s+$/, '');
-            if (!out || /MYMEMORY WARNING|QUERY LENGTH|INVALID LANGUAGE/i.test(out)) {
-              throw new Error('今天的免费翻译额度用完了，或这句话太长。请稍后再试，或缩短一点。');
-            }
-            return acc + out;
-          });
+        var signal = ctrl ? ctrl.signal : null;
+        var q = encodeURIComponent(chunk);
+        var gtx = 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=' +
+          encodeURIComponent(sl) + '&tl=' + encodeURIComponent(tl) + '&q=' + q;
+        var alt = 'https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=' +
+          encodeURIComponent(sl) + '&tl=' + encodeURIComponent(tl) + '&q=' + q;
+        return fetchGoogle(gtx, signal).then(function (out) {
+          return out;
+        }, function (err) {
+          if (err && err.name === 'AbortError') throw err;
+          return fetchGoogle(alt, signal);
+        }).then(function (out) {
+          clearTimeout(timer);
+          return acc + out;
+        }, function (err) {
+          clearTimeout(timer);
+          throw err;
+        });
       });
     });
     return chain;
@@ -2360,7 +2403,6 @@ footer p { margin: 4px 0; }
     return '<div class="syl-card">' +
       '<button type="button" class="syl-btn speakable" data-say="syl" data-text="' + esc(syl.ch) +
       '" title="点击朗读这个韩字' + esc(ipaTitle) + '">' + esc(syl.ch) + '</button>' +
-      (phon.rom ? '<span class="syl-rom">' + esc(phon.rom) + '</span>' : '') +
       '<div class="jamo-row">' + jamos + '</div>' +
       '</div>';
   }
@@ -2409,18 +2451,18 @@ footer p { margin: 4px 0; }
 
     show: function (zh, ko, opts) {
       opts = opts || {};
+      ko = keepKoreanText(ko);
       var phon = phoneticsOf(ko);
       var memo = typeof opts.memo === 'string' ? opts.memo : (zh && zh !== ko ? zh : '');
       this.current = { zh: zh, ko: ko, rom: phon.rom, ipa: phon.ipa, memo: memo };
       $('#zhSpeak').disabled = false;
       $('#zhSave').disabled = false;
       $('#trResult').hidden = false;
-      $('#trSource').textContent = zh && zh !== ko ? ('原文：' + zh) : '';
+      $('#trSource').textContent = zh && zh !== ko && /[\u3400-\u9fff]/.test(zh) ? ('原文：' + zh) : '';
       var full = $('#trKoFull');
       full.textContent = ko;
       full.dataset.text = ko;
-      $('#trRom').textContent = phon.rom || '这段没有可标音的韩字';
-      $('#trIpa').textContent = phon.ipa ? ('/' + phon.ipa + '/') : '';
+      $('#trIpa').textContent = phon.ipa ? ('/' + phon.ipa + '/') : '这段没有可标音的韩字';
       $('#trMemo').value = memo;
       $('#trBreakdown').innerHTML = this.breakdownHTML(ko);
     },
@@ -2477,9 +2519,14 @@ footer p { margin: 4px 0; }
       var hasZh = /[\u3400-\u9fff]/.test(raw);
       var hasHangul = /[가-힣ㄱ-ㆎ]/.test(raw);
       var hasEn = /[A-Za-z0-9]/.test(raw);
-      if (!hasZh && !hasEn && hasHangul) {
-        self.show(raw, raw, { memo: '' });
-        self.setStatus('这段已经是韩文，已标出英标。记忆可以自己写，点「保存」才会写入记录。', 'ok');
+      if (hasHangul && !hasZh) {
+        var pasted = keepKoreanText(raw);
+        if (!/[가-힣ㄱ-ㆎ]/.test(pasted)) {
+          self.setStatus('请输入中文、英文或数字，也可以直接粘贴韩文。', 'bad');
+          return;
+        }
+        self.show(pasted, pasted, { memo: '' });
+        self.setStatus('这段已经是韩文。记忆可以自己写，点「保存」才会写入记录。', 'ok');
         return;
       }
       if (!hasZh && !hasEn && !hasHangul) {
@@ -2497,9 +2544,14 @@ footer p { margin: 4px 0; }
           self.setStatus('没有得到结果，请换一种说法再试。', 'bad');
           return;
         }
+        ko = keepKoreanText(ko);
+        if (!ko || (!/[가-힣ㄱ-ㆎ]/.test(ko) && !/^\d+$/.test(ko))) {
+          self.setStatus('没有得到韩文，请换一种说法再试。', 'bad');
+          return;
+        }
         self.show(raw, ko, { memo: self.seedMemo(raw) });
         self.fillChineseMemo(raw, token);
-        self.setStatus('已标出英标。记忆可以改成汉语、英文或数字；只有按「保存」才会写入仓库文件。', 'ok');
+        self.setStatus('结果只保留韩文。记忆可以改成汉语、英文或数字；只有按「保存」才会写入仓库文件。', 'ok');
       }, function (err) {
         $('#zhConvert').disabled = false;
         var msg = '转换需要联网，现在没有连上翻译服务。';
@@ -2583,18 +2635,17 @@ footer p { margin: 4px 0; }
         return;
       }
       box.innerHTML = list.map(function (item) {
-        var phon = phoneticsOf(item.ko);
-        var rom = item.rom || phon.rom;
+        var koText = keepKoreanText(item.ko);
+        var phon = phoneticsOf(koText);
         var ipa = item.ipa || phon.ipa;
         var memo = typeof item.memo === 'string' ? item.memo : '';
-        var phonLine = rom ? rom : '';
-        if (ipa) phonLine += (phonLine ? '  ' : '') + '/' + ipa + '/';
+        var phonLine = ipa ? ('/' + ipa + '/') : '';
         return '<div class="saved-item">' +
           '<div>' +
-            '<div class="saved-ko">' + esc(item.ko) + '</div>' +
+            '<div class="saved-ko">' + esc(koText) + '</div>' +
             (phonLine ? '<div class="saved-ipa">' + esc(phonLine) + '</div>' : '') +
             (memo ? '<div class="saved-memo">记忆：' + esc(memo) + '</div>' : '') +
-            (item.zh && item.zh !== item.ko && item.zh !== memo ? '<div class="saved-zh">原文：' + esc(item.zh) + '</div>' : '') +
+            (item.zh && item.zh !== item.ko && item.zh !== memo && /[\u3400-\u9fff]/.test(item.zh) ? '<div class="saved-zh">原文：' + esc(item.zh) + '</div>' : '') +
             '<div class="saved-time">' + esc(formatStamp(item.at)) + '</div>' +
           '</div>' +
           '<div class="saved-actions">' +
@@ -2633,7 +2684,7 @@ footer p { margin: 4px 0; }
         if (btn.dataset.act === 'open') self.openSaved(id);
         else if (btn.dataset.act === 'play') {
           var item = self.find(id);
-          if (item) self.speakText(item.ko, 0.9);
+          if (item) self.speakText(keepKoreanText(item.ko), 0.9);
         } else if (btn.dataset.act === 'del') self.removeTranslation(id);
       });
       $('#trClear').addEventListener('click', function () {
@@ -2938,7 +2989,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-09.5';
+  var BUILD = '2026-11-09.7';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
