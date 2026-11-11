@@ -45,7 +45,7 @@
 
 ## 使用
 
-访问上面的 GitHub Pages 地址可以读已经提交的记录。要让「保存」写进仓库，在项目目录运行：
+页面会同时读取本地 `data/store.json` 和线上 https://frankjie09.github.io/hangul-phonics/data/store.json ，两份里的记录都会用。要让「保存」写进本地仓库文件，在项目目录运行：
 
 ```bash
 python3 serve.py

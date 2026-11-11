@@ -168,7 +168,7 @@ section { scroll-margin-top: 62px; margin-bottom: 34px; }
 .btn:disabled { opacity: .42; cursor: not-allowed; filter: none; }
 .btn:focus-visible, .icon-btn:focus-visible, .tile-hit:focus-visible,
 .tile-save:focus-visible, .chip:focus-visible, .opt:focus-visible,
-.fchip:focus-visible, .ko-full:focus-visible, .eojeol-word:focus-visible,
+.fchip:focus-visible, .tr-ko:focus-visible, .ko-full:focus-visible, .eojeol-word:focus-visible,
 .syl-btn:focus-visible, .jamo-btn:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
@@ -351,14 +351,21 @@ select {
 #trResult { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 #trResult[hidden] { display: none !important; }
 .tr-source { font-size: 13px; color: var(--muted); }
+.ko-line { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .ko-full {
-  display: block; width: 100%; text-align: left;
   font: inherit; font-size: 28px; font-weight: 700; line-height: 1.45;
-  padding: 12px 14px; border-radius: 14px;
-  border: 1px solid var(--border); background: var(--surface-2);
-  color: inherit; cursor: pointer; word-break: keep-all;
+  color: var(--text); background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px 16px; cursor: pointer; text-align: left;
+  word-break: keep-all;
 }
-.ko-full:hover { border-color: var(--accent); background: var(--accent-weak); }
+.ko-full:hover { border-color: var(--accent); }
+#trKoEditWrap[hidden] { display: none !important; }
+.tr-ko {
+  min-height: 72px; margin-top: 6px;
+  font-size: 26px; font-weight: 700; line-height: 1.45;
+  word-break: keep-all;
+}
 .tr-legend { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.55; }
 .tr-memory { display: flex; flex-direction: column; gap: 10px; }
 .tr-mem-label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text); }
@@ -618,7 +625,7 @@ footer p { margin: 4px 0; }
   .pr-options { grid-template-columns: 1fr; }
   .pr-prompt { font-size: 52px; }
   .wb-char { font-size: 76px; }
-  .ko-full { font-size: 22px; }
+  .ko-full, .tr-ko { font-size: 22px; }
   .saved-item { flex-direction: column; }
   .panel { padding: 16px; }
   section { margin-bottom: 28px; }
@@ -669,7 +676,7 @@ footer p { margin: 4px 0; }
   <section id="translate">
     <div class="section-head">
       <h2>中文转韩文 <span class="sec-kr">번역</span></h2>
-      <p class="hint">可输入中文、英文或数字。转换结果只保留韩文，并给出音标。记忆文字可自行修改。只有按下「保存」才写入仓库里的 data/store.json</p>
+      <p class="hint">可输入中文、英文或数字。转换完成后会自动记下。点韩文就朗读，要改请按「修改」。</p>
     </div>
     <div class="panel">
       <label class="sub" for="zhInput" style="display:block;font-size:12.5px;margin-bottom:6px">输入中文、英文或数字，也可以直接粘贴韩文来拆开</label>
@@ -679,26 +686,33 @@ footer p { margin: 4px 0; }
         <button class="btn" id="zhSpeak" type="button" disabled>朗读韩文</button>
         <button class="btn ghost" id="zhSave" type="button" disabled>保存</button>
       </div>
-      <p class="tr-status" id="trStatus" role="status">转换需要联网。用 python3 serve.py 打开后再按「保存」，记录会写入仓库的 data/store.json，推送和拉取可以带走。</p>
+      <p class="tr-status" id="trStatus" role="status">转换需要联网。结果出现后会自动记下。</p>
       <div id="trResult" hidden>
         <div class="tr-source" id="trSource"></div>
-        <button class="ko-full speakable" id="trKoFull" type="button" data-say="all" title="点击朗读整段韩文"></button>
+        <div class="ko-line">
+          <button type="button" class="ko-full speakable" id="trKoFull" data-say="all" data-text="" title="点击朗读整段韩文"></button>
+          <div id="trKoEditWrap" hidden>
+            <label class="tr-mem-label" for="trKoEdit">韩文 <span>改完按「完成」，拆字和音标会跟着变</span></label>
+            <textarea id="trKoEdit" class="tr-input tr-ko" rows="2" maxlength="4000" placeholder="在这里修改韩文"></textarea>
+          </div>
+          <button class="btn ghost" id="trKoEditBtn" type="button">修改</button>
+        </div>
         <div class="tr-memory">
           <div>
             <div class="tr-mem-label">音标 <span>用来记读音</span></div>
             <div class="tr-ipa" id="trIpa"></div>
           </div>
           <div>
-            <label class="tr-mem-label" for="trMemo">记忆 <span>可改成汉语、英文或数字，按保存才写入</span></label>
+            <label class="tr-mem-label" for="trMemo">记忆 <span>可改成汉语、英文或数字，离开输入框后会记下</span></label>
             <textarea id="trMemo" class="tr-input tr-memo" rows="2" maxlength="500" placeholder="例如：你好，或 hello，或 123"></textarea>
           </div>
         </div>
-        <p class="tr-legend">整段可以点，也可以按「朗读韩文」。下面先拆开每一截韩文，每个韩字再拆成初声、中声、收音。点哪一块，就读哪一块。</p>
+        <p class="tr-legend">点上面的韩文朗读整段。下面先拆开每一截韩文，每个韩字再拆成初声、中声、收音。点哪一块，就读哪一块。要改韩文，按「修改」。</p>
         <div class="ko-flow" id="trBreakdown"></div>
       </div>
       <div class="tr-saved">
         <h3>已保存的转换 <span class="count" id="trSavedCount">0</span></h3>
-        <p class="hint" style="margin:0 0 8px">和复习记录存在仓库的 data/store.json。只有按下「保存」才写入。提交并推送后，另一台拉取就能看到。</p>
+        <p class="hint" style="margin:0 0 8px">转换完成后会自动出现在这里。本地 data/store.json 和线上同一份文件里的记录都会用。</p>
         <div class="saved-list" id="trSaved"></div>
         <div class="tr-actions">
           <button class="btn ghost" id="trClear" type="button">清空已保存的转换</button>
@@ -1114,9 +1128,11 @@ footer p { margin: 4px 0; }
   /* ==========================================================================
      3. 本地存储 / 全局状态
      ========================================================================== */
-  /* 浏览器里留一份副本，方便刷新。能跟着推送和拉取走的是仓库文件 data/store.json。
-     页面要通过 python3 serve.py 打开，按下保存才会把学习记录写进这个文件。 */
+  /* 浏览器里留一份副本，方便刷新。
+     打开页面时同时读本地 data/store.json 和线上仓库里的同一份文件，两份记录都会用。
+     写进本地文件仍要 python3 serve.py。 */
   var STORE_KEY = 'hangul-phonics-v1';
+  var ONLINE_STORE = 'https://frankjie09.github.io/hangul-phonics/data/store.json';
 
   var Store = {
     data: {
@@ -1224,34 +1240,156 @@ footer p { margin: 4px 0; }
         if (done) done(false);
       });
     },
-    /* 打开页面时读仓库文件：文件更新就采用文件；本机有、文件没有，就补写进文件。 */
+    normalizeShared: function (parsed) {
+      var out = {
+        updatedAt: 0,
+        learned: [],
+        reviewLetters: [],
+        reviewSyllables: [],
+        translations: [],
+        stats: { correct: 0, total: 0 }
+      };
+      if (!parsed || typeof parsed !== 'object') return out;
+      if (Array.isArray(parsed.learned)) out.learned = this.cleanChars(parsed.learned);
+      if (Array.isArray(parsed.reviewLetters)) out.reviewLetters = this.cleanChars(parsed.reviewLetters);
+      if (Array.isArray(parsed.reviewSyllables)) out.reviewSyllables = this.cleanChars(parsed.reviewSyllables);
+      if (Array.isArray(parsed.translations)) {
+        var list = [];
+        parsed.translations.forEach(function (item, i) {
+          if (!item || typeof item.ko !== 'string' || typeof item.zh !== 'string') return;
+          if (!item.ko || !item.zh) return;
+          list.push({
+            id: typeof item.id === 'string' && item.id ? item.id : ('t' + i + '-' + (item.at || 0)),
+            zh: String(item.zh).slice(0, 4000),
+            ko: String(item.ko).slice(0, 4000),
+            rom: typeof item.rom === 'string' ? item.rom.slice(0, 4000) : '',
+            ipa: typeof item.ipa === 'string' ? item.ipa.slice(0, 4000) : '',
+            memo: typeof item.memo === 'string' ? item.memo.slice(0, 500) : '',
+            at: Number(item.at) || 0
+          });
+        });
+        if (list.length > 40) list.length = 40;
+        out.translations = list;
+      }
+      if (parsed.stats && typeof parsed.stats.total === 'number') {
+        out.stats = {
+          correct: Number(parsed.stats.correct) || 0,
+          total: Number(parsed.stats.total) || 0
+        };
+      }
+      if (typeof parsed.updatedAt === 'number' && isFinite(parsed.updatedAt)) out.updatedAt = parsed.updatedAt;
+      return out;
+    },
+    unionChars: function (first, second) {
+      var out = (first || []).slice();
+      (second || []).forEach(function (ch) {
+        if (out.indexOf(ch) === -1) out.push(ch);
+      });
+      if (out.length > 80) out.length = 80;
+      return out;
+    },
+    mergeShared: function (a, b) {
+      var newer = (a.updatedAt || 0) >= (b.updatedAt || 0) ? a : b;
+      var older = newer === a ? b : a;
+      var translations = [];
+      var seen = {};
+      newer.translations.concat(older.translations).forEach(function (item) {
+        var key = item.zh + '\n' + item.ko;
+        if (seen[key] == null) {
+          seen[key] = translations.length;
+          translations.push(item);
+        } else if ((item.at || 0) > (translations[seen[key]].at || 0)) {
+          translations[seen[key]] = item;
+        }
+      });
+      if (translations.length > 40) translations.length = 40;
+      var stats = newer.stats || { correct: 0, total: 0 };
+      if ((older.stats.total || 0) > (stats.total || 0)) stats = older.stats;
+      return {
+        updatedAt: Math.max(a.updatedAt || 0, b.updatedAt || 0),
+        learned: this.unionChars(newer.learned, older.learned),
+        reviewLetters: this.unionChars(newer.reviewLetters, older.reviewLetters),
+        reviewSyllables: this.unionChars(newer.reviewSyllables, older.reviewSyllables),
+        translations: translations,
+        stats: {
+          correct: Number(stats.correct) || 0,
+          total: Number(stats.total) || 0
+        }
+      };
+    },
+    snapshotSig: function (snap) {
+      return [
+        snap.updatedAt || 0,
+        (snap.learned || []).join(','),
+        (snap.reviewLetters || []).join(','),
+        (snap.reviewSyllables || []).join(','),
+        (snap.translations || []).map(function (item) {
+          return item.zh + '\t' + item.ko + '\t' + (item.at || 0);
+        }).join('\n'),
+        (snap.stats.correct || 0) + '/' + (snap.stats.total || 0)
+      ].join('|');
+    },
+    /* 同时读本地 data/store.json 和线上仓库里的同一份文件，两份记录都合起来用。 */
     pullRepo: function (done) {
       var self = this;
       if (typeof fetch !== 'function') {
-        if (done) done('offline');
+        if (done) done({ kind: 'offline' });
         return;
       }
-      fetch('data/store.json?t=' + Date.now(), { cache: 'no-store' }).then(function (res) {
-        if (!res.ok) throw new Error('missing');
-        return res.json();
-      }).then(function (parsed) {
-        var fileAt = Number(parsed && parsed.updatedAt) || 0;
-        var localAt = Number(self.data.updatedAt) || 0;
-        var fileN = self.sharedCount(parsed);
-        var localN = self.sharedCount(self.data);
-        if (fileAt > localAt || (fileN && !localN)) {
-          self.applyShared(parsed);
+      function fetchStore(url) {
+        var joiner = url.indexOf('?') === -1 ? '?' : '&';
+        return fetch(url + joiner + 't=' + Date.now(), { cache: 'no-store' }).then(function (res) {
+          if (!res.ok) throw new Error('missing');
+          return res.json();
+        }, function () {
+          return null;
+        }).then(function (data) {
+          return data || null;
+        }, function () {
+          return null;
+        });
+      }
+      var jobs = [fetchStore('data/store.json')];
+      var onPages = location.hostname === 'frankjie09.github.io';
+      if (!onPages) jobs.push(fetchStore(ONLINE_STORE));
+      Promise.all(jobs).then(function (list) {
+        var localFile = list[0] ? self.normalizeShared(list[0]) : null;
+        var onlineFile = !onPages && list[1] ? self.normalizeShared(list[1]) : null;
+        if (onPages && localFile) onlineFile = localFile;
+        function usable(snap) {
+          return !!(snap && (self.sharedCount(snap) || snap.updatedAt > 0));
+        }
+        var files = null;
+        if (usable(localFile) && !onPages) files = localFile;
+        if (usable(onlineFile)) files = files ? self.mergeShared(files, onlineFile) : onlineFile;
+        var browser = self.normalizeShared(self.sharedSnapshot());
+        var merged = files ? self.mergeShared(files, browser) : browser;
+        var adopted = self.snapshotSig(merged) !== self.snapshotSig(browser);
+        if (adopted) {
+          self.applyShared(merged);
           self.save();
-          if (done) done('file');
+        }
+        var localAt = Number(localFile && localFile.updatedAt) || 0;
+        var browserAt = Number(browser.updatedAt) || 0;
+        if (!onPages && usable(browser) && (!localFile || browserAt > localAt || (self.sharedCount(browser) && !self.sharedCount(localFile)))) {
+          self.commitShared(function (ok) {
+            if (done) done({
+              kind: ok ? 'pushed' : (adopted ? 'merged' : 'browser'),
+              local: !!list[0],
+              online: !!list[1]
+            });
+          });
           return;
         }
-        if (localAt > fileAt || (localN && !fileN)) {
-          self.commitShared(function (ok) { if (done) done(ok ? 'pushed' : 'local'); });
-          return;
+        if (done) {
+          done({
+            kind: adopted ? 'merged' : 'same',
+            local: !onPages && !!list[0],
+            online: onPages ? !!list[0] : !!list[1]
+          });
         }
-        if (done) done('same');
       }, function () {
-        if (done) done('offline');
+        if (done) done({ kind: 'offline' });
       });
     },
     learn: function (ch) {
@@ -1776,15 +1914,15 @@ footer p { margin: 4px 0; }
       var tip = $('#storageTip');
       if (!tip) return;
       tip.textContent = storageOK
-        ? '按下保存后写入仓库的 data/store.json。请用 python3 serve.py 打开，提交并推送后另一台拉取就能看到。主题和语音仍留在这台浏览器。'
-        : '当前浏览器禁止本地存储。用 python3 serve.py 打开后，按下保存仍会写入仓库的 data/store.json。';
+        ? '会读取本地 data/store.json 和线上仓库里的同一份文件，两份记录都会用。主题和语音仍留在这台浏览器。'
+        : '当前浏览器禁止本地存储。';
     }
   };
 
   function reportRepo(ok) {
     var text = ok
       ? '已写入仓库文件 data/store.json。提交并推送后，另一台拉取就能看到同一份记录。'
-      : '已记在这台浏览器。请在项目目录运行 python3 serve.py 打开后再保存，记录才会进入 data/store.json。';
+      : '已记下。';
     var tip = $('#storageTip');
     if (tip) tip.textContent = text;
     return text;
@@ -2416,6 +2554,7 @@ footer p { margin: 4px 0; }
 
   var Translate = {
     current: null,
+    editing: false,
 
     init: function () {
       this.renderSaved();
@@ -2455,16 +2594,60 @@ footer p { margin: 4px 0; }
       var phon = phoneticsOf(ko);
       var memo = typeof opts.memo === 'string' ? opts.memo : (zh && zh !== ko ? zh : '');
       this.current = { zh: zh, ko: ko, rom: phon.rom, ipa: phon.ipa, memo: memo };
+      this.setEditing(false);
       $('#zhSpeak').disabled = false;
       $('#zhSave').disabled = false;
       $('#trResult').hidden = false;
       $('#trSource').textContent = zh && zh !== ko && /[\u3400-\u9fff]/.test(zh) ? ('原文：' + zh) : '';
       var full = $('#trKoFull');
       full.textContent = ko;
-      full.dataset.text = ko;
+      full.setAttribute('data-text', ko);
+      $('#trKoEdit').value = ko;
       $('#trIpa').textContent = phon.ipa ? ('/' + phon.ipa + '/') : '这段没有可标音的韩字';
       $('#trMemo').value = memo;
       $('#trBreakdown').innerHTML = this.breakdownHTML(ko);
+      if (!opts.keep) this.remember(false);
+    },
+
+    setEditing: function (on) {
+      this.editing = !!on;
+      var wrap = $('#trKoEditWrap');
+      var full = $('#trKoFull');
+      var btn = $('#trKoEditBtn');
+      if (wrap) wrap.hidden = !on;
+      if (full) full.hidden = !!on;
+      if (btn) btn.textContent = on ? '完成' : '修改';
+    },
+
+    beginEdit: function () {
+      if (!this.current) return;
+      this.editOrigin = this.current.ko;
+      $('#trKoEdit').value = this.current.ko;
+      this.setEditing(true);
+      $('#trKoEdit').focus();
+    },
+
+    finishEdit: function () {
+      if (!this.editing || !this.current) return;
+      this.editing = false;
+      var prev = this.editOrigin || this.current.ko;
+      this.editOrigin = '';
+      var ko = keepKoreanText($('#trKoEdit').value);
+      var ok = !!(ko && (/[가-힣ㄱ-ㆎ]/.test(ko) || /^\d+$/.test(ko)));
+      if (!ok) {
+        ko = this.current.ko;
+        this.setStatus('没有留下韩文，已恢复原来的。', 'bad');
+      }
+      $('#trKoEdit').value = ko;
+      this.refreshFromKo(ko);
+      var full = $('#trKoFull');
+      full.textContent = ko;
+      full.setAttribute('data-text', ko);
+      this.setEditing(false);
+      if (ok) {
+        this.replaceKo = prev && prev !== ko ? prev : '';
+        this.remember(false);
+      }
     },
 
     speakText: function (text, rate) {
@@ -2502,6 +2685,7 @@ footer p { margin: 4px 0; }
         if (!zh || $('#trMemo').value !== raw) return;
         $('#trMemo').value = zh;
         self.current.memo = zh;
+        self.remember(false);
       }, function () { /* 汉语记忆取不到时，保留原文，用户仍可自己改 */ });
     },
 
@@ -2526,7 +2710,7 @@ footer p { margin: 4px 0; }
           return;
         }
         self.show(pasted, pasted, { memo: '' });
-        self.setStatus('这段已经是韩文。记忆可以自己写，点「保存」才会写入记录。', 'ok');
+        self.setStatus('这段已经是韩文，已记下。点韩文即可朗读。', 'ok');
         return;
       }
       if (!hasZh && !hasEn && !hasHangul) {
@@ -2551,7 +2735,7 @@ footer p { margin: 4px 0; }
         }
         self.show(raw, ko, { memo: self.seedMemo(raw) });
         self.fillChineseMemo(raw, token);
-        self.setStatus('结果只保留韩文。记忆可以改成汉语、英文或数字；只有按「保存」才会写入仓库文件。', 'ok');
+        self.setStatus('已记下。点韩文朗读，要改请按「修改」。', 'ok');
       }, function (err) {
         $('#zhConvert').disabled = false;
         var msg = '转换需要联网，现在没有连上翻译服务。';
@@ -2561,10 +2745,60 @@ footer p { margin: 4px 0; }
       });
     },
 
-    saveCurrent: function () {
-      if (!this.current || !this.current.ko) return;
+    refreshFromKo: function (ko) {
+      if (!this.current) return;
+      ko = String(ko || '');
+      var phon = phoneticsOf(ko);
+      this.current.ko = ko;
+      this.current.rom = phon.rom;
+      this.current.ipa = phon.ipa;
+      $('#trIpa').textContent = phon.ipa ? ('/' + phon.ipa + '/') : (ko ? '这段没有可标音的韩字' : '');
+      $('#trBreakdown').innerHTML = this.breakdownHTML(ko);
+      var ok = /[가-힣ㄱ-ㆎ]/.test(ko) || /^\d+$/.test(ko);
+      $('#zhSpeak').disabled = !ko;
+      $('#zhSave').disabled = !ok;
+    },
+
+    unchanged: function (ko, memo) {
+      var list = Store.data.translations || [];
+      var key = this.current.zh + '\n' + ko;
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if ((item.zh + '\n' + item.ko) !== key) continue;
+        return (item.memo || '') === memo &&
+          (item.ipa || '') === (this.current.ipa || '') &&
+          (item.rom || '') === (this.current.rom || '');
+      }
+      return false;
+    },
+
+    remember: function (fromButton) {
+      if (!this.current) return;
+      var ko = this.editing ? keepKoreanText($('#trKoEdit').value) : this.current.ko;
+      if (this.editing) {
+        if ($('#trKoEdit').value !== ko) $('#trKoEdit').value = ko;
+        this.refreshFromKo(ko);
+      }
+      if (!ko || (!/[가-힣ㄱ-ㆎ]/.test(ko) && !/^\d+$/.test(ko))) {
+        if (fromButton) this.setStatus('请先留下韩文再保存。', 'bad');
+        return;
+      }
       var memo = $('#trMemo').value.replace(/\s+$/g, '').replace(/^\s+/g, '');
       this.current.memo = memo;
+      var replaced = false;
+      if (this.replaceKo && this.replaceKo !== ko) {
+        var oldKey = this.current.zh + '\n' + this.replaceKo;
+        var list = Store.data.translations || [];
+        for (var j = 0; j < list.length; j++) {
+          if ((list[j].zh + '\n' + list[j].ko) === oldKey) {
+            list.splice(j, 1);
+            replaced = true;
+            break;
+          }
+        }
+      }
+      this.replaceKo = '';
+      if (!fromButton && !replaced && this.unchanged(ko, memo)) return;
       Store.addTranslation({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         zh: this.current.zh,
@@ -2576,8 +2810,9 @@ footer p { margin: 4px 0; }
       });
       var self = this;
       Store.commitShared(function (ok) {
-        self.setStatus(reportRepo(ok), ok ? 'ok' : 'bad');
+        self.setStatus(reportRepo(ok), 'ok');
       });
+      if (!fromButton) return;
       var btn = $('#zhSave');
       var old = btn.textContent;
       btn.textContent = '✓ 已保存';
@@ -2603,8 +2838,8 @@ footer p { margin: 4px 0; }
       var memo = typeof item.memo === 'string'
         ? item.memo
         : (item.zh && item.zh !== item.ko ? item.zh : '');
-      this.show(item.zh, item.ko, { memo: memo });
-      this.setStatus('已打开保存的记录，可以改记忆文字后再保存。', '');
+      this.show(item.zh, item.ko, { memo: memo, keep: true });
+      this.setStatus('已打开这条记录。点韩文朗读，按「修改」可以改。', '');
       var box = $('#trResult');
       if (box && box.scrollIntoView) box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
@@ -2617,7 +2852,7 @@ footer p { margin: 4px 0; }
           this.renderSaved();
           var self = this;
           Store.commitShared(function (ok) {
-            self.setStatus(reportRepo(ok), ok ? 'ok' : 'bad');
+            self.setStatus(reportRepo(ok), 'ok');
           });
           return;
         }
@@ -2631,7 +2866,7 @@ footer p { margin: 4px 0; }
       if (!box) return;
       if (count) count.textContent = String(list.length);
       if (!list.length) {
-        box.innerHTML = '<span class="empty">还没有保存。转换或拆开之后，只有按下「保存」才会出现在这里。</span>';
+        box.innerHTML = '<span class="empty">还没有记录。转换完成后会自动出现在这里。</span>';
         return;
       }
       box.innerHTML = list.map(function (item) {
@@ -2663,9 +2898,25 @@ footer p { margin: 4px 0; }
       $('#zhSpeak').addEventListener('click', function () {
         if (self.current) self.speakText(self.current.ko, 0.9);
       });
-      $('#zhSave').addEventListener('click', function () { self.saveCurrent(); });
+      $('#zhSave').addEventListener('click', function () { self.remember(true); });
+      $('#trKoEditBtn').addEventListener('mousedown', function (e) {
+        if (self.editing) e.preventDefault();
+      });
+      $('#trKoEditBtn').addEventListener('click', function () {
+        if (self.editing) self.finishEdit();
+        else self.beginEdit();
+      });
+      $('#trKoEdit').addEventListener('input', function () {
+        self.refreshFromKo(this.value);
+      });
+      $('#trKoEdit').addEventListener('blur', function () {
+        if (self.editing) self.finishEdit();
+      });
       $('#trMemo').addEventListener('input', function () {
         if (self.current) self.current.memo = $('#trMemo').value;
+      });
+      $('#trMemo').addEventListener('blur', function () {
+        if (self.current) self.remember(false);
       });
       $('#trResult').addEventListener('click', function (e) {
         var el = e.target.closest('[data-say]');
@@ -2693,7 +2944,7 @@ footer p { margin: 4px 0; }
         Store.data.translations = [];
         self.renderSaved();
         Store.commitShared(function (ok) {
-          self.setStatus(reportRepo(ok), ok ? 'ok' : 'bad');
+          self.setStatus(reportRepo(ok), 'ok');
         });
       });
     }
@@ -2966,17 +3217,23 @@ footer p { margin: 4px 0; }
     var actions = document.querySelector('#review .rev-actions');
     if (actions) actions.appendChild(tip);
     Review.updateTitles();
-    Store.pullRepo(function (kind) {
-      if (kind === 'file') {
+    Store.pullRepo(function (result) {
+      result = result || {};
+      if (result.kind === 'merged' || result.kind === 'pushed') {
         Review.render();
         Translate.renderSaved();
         Progress.render();
         Practice.renderStats();
-        var tip = $('#storageTip');
-        if (tip) tip.textContent = '已从仓库文件 data/store.json 读入记录。';
-      } else if (kind === 'pushed') {
-        var pushed = $('#storageTip');
-        if (pushed) pushed.textContent = '本机已有的记录已写入 data/store.json。提交并推送后，另一台拉取就能看到。';
+      }
+      var tip = $('#storageTip');
+      if (!tip) return;
+      var from = [];
+      if (result.local) from.push('本地');
+      if (result.online) from.push('线上');
+      if (from.length) {
+        tip.textContent = '已读取' + from.join('和') + '的 data/store.json，两份记录都会用。';
+      } else if (result.kind === 'pushed') {
+        tip.textContent = '本机已有的记录已写入本地 data/store.json。';
       }
     });
   }
@@ -2989,7 +3246,7 @@ footer p { margin: 4px 0; }
 
   /* 构建版本号：排查「是不是打开着旧的缓存页面」时非常关键。
      如果页脚版本号与最新提交不一致，说明浏览器还在跑旧代码。 */
-  var BUILD = '2026-11-09.7';
+  var BUILD = '2026-11-11.2';
   (function stampBuild() {
     var el = $('#buildTag');
     if (el) {
