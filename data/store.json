@@ -1,9 +1,211 @@
 {
-  "updatedAt": 0,
-  "learned": [],
+  "updatedAt": 1794460155583,
+  "learned": [
+    "ㅇ",
+    "ㄴ",
+    "ㅁ",
+    "ㄹ",
+    "ㅂ",
+    "ㅈ",
+    "ㄷ",
+    "ㄱ",
+    "ㅕ",
+    "ㄲ",
+    "ㄸ"
+  ],
   "reviewLetters": [],
   "reviewSyllables": [],
-  "translations": [],
+  "translations": [
+    {
+      "id": "num0128febf",
+      "zh": "一",
+      "ko": "하나",
+      "rom": "hana",
+      "ipa": "",
+      "memo": "一 哈拿",
+      "at": 1794460155583
+    },
+    {
+      "id": "num0228febf",
+      "zh": "二",
+      "ko": "둘",
+      "rom": "dul",
+      "ipa": "",
+      "memo": "二 图尔",
+      "at": 1794460155582
+    },
+    {
+      "id": "num0328febf",
+      "zh": "三",
+      "ko": "셋",
+      "rom": "set",
+      "ipa": "",
+      "memo": "三 塞",
+      "at": 1794460155581
+    },
+    {
+      "id": "num0428febf",
+      "zh": "四",
+      "ko": "넷",
+      "rom": "net",
+      "ipa": "",
+      "memo": "四 内",
+      "at": 1794460155580
+    },
+    {
+      "id": "num0528febf",
+      "zh": "五",
+      "ko": "다섯",
+      "rom": "daseot",
+      "ipa": "",
+      "memo": "五 塔索",
+      "at": 1794460155579
+    },
+    {
+      "id": "num0628febf",
+      "zh": "六",
+      "ko": "여섯",
+      "rom": "yeoseot",
+      "ipa": "",
+      "memo": "六 哟索",
+      "at": 1794460155578
+    },
+    {
+      "id": "num0728febf",
+      "zh": "七",
+      "ko": "일곱",
+      "rom": "ilgop",
+      "ipa": "",
+      "memo": "七 伊尔郭",
+      "at": 1794460155577
+    },
+    {
+      "id": "num0828febf",
+      "zh": "八",
+      "ko": "여덟",
+      "rom": "yeodeol",
+      "ipa": "",
+      "memo": "八 哟兜尔",
+      "at": 1794460155576
+    },
+    {
+      "id": "num0928febf",
+      "zh": "九",
+      "ko": "아홉",
+      "rom": "ahop",
+      "ipa": "",
+      "memo": "九 阿洪",
+      "at": 1794460155575
+    },
+    {
+      "id": "num1028febf",
+      "zh": "十",
+      "ko": "열",
+      "rom": "yeol",
+      "ipa": "",
+      "memo": "十 哟尔",
+      "at": 1794460155574
+    },
+    {
+      "id": "mwd35fpmbvxl",
+      "zh": "一个",
+      "ko": "한 개",
+      "rom": "han gae",
+      "ipa": "han kɛ",
+      "memo": "一个 汗gay",
+      "at": 1794459997642
+    },
+    {
+      "id": "mwd31mhtk9hu",
+      "zh": "一位",
+      "ko": "혼자예요",
+      "rom": "hon-ja-ye-yo",
+      "ipa": "hon.tɕa.je.jo",
+      "memo": "一位  洪佳耶哟",
+      "at": 1794459819809
+    },
+    {
+      "id": "mwd2szjvfw5k",
+      "zh": "我来付款",
+      "ko": "결제할게요",
+      "rom": "gyeol-je-hal-ge-yo",
+      "ipa": "kjʌl.tɕe.hal.ke.jo",
+      "memo": "我来付款 Qchai哈克油",
+      "at": 1794459416827
+    },
+    {
+      "id": "mwcy6hr73jdd",
+      "zh": "ok",
+      "ko": "좋아요",
+      "rom": "jot-a-yo",
+      "ipa": "tɕot̚.a.jo",
+      "memo": "好的 凑啊哟",
+      "at": 1794451648867
+    },
+    {
+      "id": "mwbf3muh6328",
+      "zh": "谢谢",
+      "ko": "감사합니다",
+      "rom": "gam-sa-hap-ni-da",
+      "ipa": "kam.sa.hap̚.ni.ta",
+      "memo": "谢谢 砍萨哈姆尼达",
+      "at": 1794359136617
+    },
+    {
+      "id": "mwbeyyzjwtnp",
+      "zh": "没关系",
+      "ko": "괜찮아요",
+      "rom": "gwaen-chan-a-yo",
+      "ipa": "kwɛn.tɕʰan.a.jo",
+      "memo": "没关系 困擦那哟",
+      "at": 1794358919071
+    },
+    {
+      "id": "mwbevqanfxjg",
+      "zh": "多少钱",
+      "ko": "얼마예요",
+      "rom": "eol-ma-ye-yo",
+      "ipa": "ʌl.ma.je.jo",
+      "memo": "多少钱   欧儿马耶哟",
+      "at": 1794358767839
+    },
+    {
+      "id": "mwbetgkkzj87",
+      "zh": "买单",
+      "ko": "계산요",
+      "rom": "gye-san-yo",
+      "ipa": "kje.san.jo",
+      "memo": "买单  给sun油",
+      "at": 1794358661924
+    },
+    {
+      "id": "mwbem6c3vhjb",
+      "zh": "你好",
+      "ko": "안녕하세요",
+      "rom": "an-nyeong-ha-se-yo",
+      "ipa": "an.njʌŋ.ha.se.jo",
+      "memo": "你好。安宁哈赛sei悠",
+      "at": 1794358322067
+    },
+    {
+      "id": "mw8tlgk0zjo0",
+      "zh": "厕所",
+      "ko": "화장실",
+      "rom": "hwa-jang-sil",
+      "ipa": "hwa.tɕaŋ.sil",
+      "memo": "厕所 花张slin",
+      "at": 1794202084368
+    },
+    {
+      "id": "mw8neiwdoi8q",
+      "zh": "打扰一下",
+      "ko": "실례!",
+      "rom": "",
+      "ipa": "",
+      "memo": "",
+      "at": 1794191683117
+    }
+  ],
   "stats": {
     "correct": 0,
     "total": 0
